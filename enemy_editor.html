@@ -15,11 +15,33 @@
                     <div class="form-group">
                         <input type="text" id="name" name="名称" placeholder="名称" required>
                     </div>
-                    <div class="form-group">
+                    <div class="form-group" style="position: relative;">
                         <input type="text" id="tier" name="位阶" placeholder="位阶" required>
+                        <select class="dropdown-trigger" onchange="this.previousElementSibling.value=this.value; this.selectedIndex=0;">
+                            <option value="" disabled selected></option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                        </select>
+                        <span class="dropdown-arrow">▼</span>
                     </div>
-                    <div class="form-group">
+                    <div class="form-group" style="position: relative;">
                         <input type="text" id="category" name="种类" placeholder="种类">
+                        <select id="category-select" class="dropdown-trigger" onchange="this.previousElementSibling.value=this.value; this.selectedIndex=0;">
+                            <option value="" disabled selected></option>
+                            <option value="斗士">斗士</option>
+                            <option value="集群">集群</option>
+                            <option value="头目">头目</option>
+                            <option value="杂兵">杂兵</option>
+                            <option value="远程">远程</option>
+                            <option value="潜伏">潜伏</option>
+                            <option value="社交">社交</option>
+                            <option value="独狼">独狼</option>
+                            <option value="标准">标准</option>
+                            <option value="辅助">辅助</option>
+                        </select>
+                        <span class="dropdown-arrow">▼</span>
                     </div>
                 </div>
 
@@ -28,13 +50,12 @@
                         <input type="text" id="intro" name="简介" placeholder="简介">
                     </div>
                 </div>                
-                <div class="form-row">
-                    
+                <div class="form-row">                    
                     <div class="form-group">
                         <input type="text" id="tactics" name="动机与战术" placeholder="动机与战术">
                     </div>
                     <div class="form-group">
-                        <input type="text" id="experiences" name="经历" placeholder="经历（例如：疾行+2）">
+                        <input type="text" id="experiences" name="经历" placeholder="经历">
                     </div>
                 </div>
 
@@ -65,14 +86,29 @@
                     <div class="form-group">
                         <input type="text" id="attackWeapon" name="攻击武器" placeholder="武器">
                     </div>
-                    <div class="form-group">
+                    <div class="form-group" style="position: relative;">
                         <input type="text" id="attackRange" name="攻击范围" placeholder="范围">
+                        <select class="dropdown-trigger" onchange="this.previousElementSibling.value=this.value; this.selectedIndex=0;">
+                            <option value="" disabled selected></option>
+                            <option value="近战">近战</option>
+                            <option value="邻近">邻近</option>
+                            <option value="近">近</option>
+                            <option value="远">远</option>
+                            <option value="极远">极远</option>
+                        </select>
+                        <span class="dropdown-arrow">▼</span>
                     </div>
                     <div class="form-group">
                         <input type="text" id="attackDamage" name="攻击伤害" placeholder="伤害">
                     </div>
-                    <div class="form-group">
+                    <div class="form-group" style="position: relative;">
                         <input type="text" id="attackAttr" name="攻击属性" placeholder="属性">
+                        <select class="dropdown-trigger" onchange="this.previousElementSibling.value=this.value; this.selectedIndex=0;">
+                            <option value="" disabled selected></option>
+                            <option value="物理">物理</option>
+                            <option value="魔法">魔法</option>
+                        </select>
+                        <span class="dropdown-arrow">▼</span>
                     </div>
                 </div>
             </div>
@@ -99,8 +135,15 @@
                 <div class="form-group">
                     <input type="text" class="trait-name" name="特性名称" placeholder="特性名称" required>
                 </div>
-                <div class="form-group">
+                <div class="form-group" style="position: relative;">
                     <input type="text" class="trait-type" name="特性类型" placeholder="特性类型 (被动/动作/反应)">
+                    <select class="dropdown-trigger" onchange="this.previousElementSibling.value=this.value; this.selectedIndex=0;">
+                        <option value="" disabled selected></option>
+                        <option value="被动">被动</option>
+                        <option value="动作">动作</option>
+                        <option value="反应">反应</option>
+                    </select>
+                    <span class="dropdown-arrow">▼</span>
                 </div>
                 <button type="button" class="btn-icon remove-trait" title="删除">×</button>
             </div>

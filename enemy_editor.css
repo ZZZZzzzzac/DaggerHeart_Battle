@@ -16,20 +16,6 @@ body {
     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
 
-h1 {
-    text-align: center;
-    color: #2c3e50;
-    margin-bottom: 30px;
-}
-
-h2 {
-    color: #2c3e50;
-    border-bottom: 2px solid #eee;
-    padding-bottom: 10px;
-    margin-bottom: 20px;
-    font-size: 1.2rem;
-}
-
 .form-section {
     margin-bottom: 30px;
 }
@@ -47,16 +33,6 @@ h2 {
     align-items: center;
 }
 
-.form-group label {
-    font-weight: 600;
-    margin-right: 10px;
-    font-size: 0.9rem;
-    color: #555;
-    white-space: nowrap;
-    min-width: 4em;
-    text-align: right;
-}
-
 .form-group input,
 .form-group textarea {
     flex: 1;
@@ -68,12 +44,29 @@ h2 {
     width: 100%; /* 确保在 flex 容器中占满 */
 }
 
-.form-group:has(textarea) {
-    align-items: flex-start;
+/* 种类输入框的下拉样式 */
+#category {
+    padding-right: 30px;
 }
 
-.form-group:has(textarea) label {
-    margin-top: 10px;
+.dropdown-trigger {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 30px;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.dropdown-arrow {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: #aaa;
+    font-size: 0.8rem;
 }
 
 .form-group input:focus,
@@ -87,21 +80,6 @@ h2 {
 }
 
 /* 特性部分 */
-.section-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 2px solid #eee;
-    padding-bottom: 10px;
-    margin-bottom: 20px;
-}
-
-.section-header h2 {
-    border-bottom: none;
-    margin-bottom: 0;
-    padding-bottom: 0;
-}
-
 .trait-item {
     background: #f9f9f9;
     border: 1px solid #eee;
