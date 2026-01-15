@@ -39,7 +39,6 @@ body {
     font-size: 0.9rem;
     color: #555;
     white-space: nowrap;
-    /* min-width: 4em; */
     text-align: left;
 }
 
@@ -52,6 +51,7 @@ body {
     font-size: 1rem;
     transition: border-color 0.3s;
     width: 100%; /* 确保在 flex 容器中占满 */
+    min-width: 20px;
 }
 
 /* 种类输入框的下拉样式 */
