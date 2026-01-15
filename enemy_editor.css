@@ -33,6 +33,16 @@ body {
     align-items: center;
 }
 
+.form-group label {
+    font-weight: 600;
+    margin-right: 10px;
+    font-size: 0.9rem;
+    color: #555;
+    white-space: nowrap;
+    /* min-width: 4em; */
+    text-align: left;
+}
+
 .form-group input,
 .form-group textarea {
     flex: 1;
@@ -46,6 +56,10 @@ body {
 
 /* 种类输入框的下拉样式 */
 #category {
+    padding-right: 30px;
+}
+
+.form-group:has(.dropdown-trigger) input {
     padding-right: 30px;
 }
 
@@ -67,6 +81,10 @@ body {
     pointer-events: none;
     color: #aaa;
     font-size: 0.8rem;
+}
+
+.form-group input + input {
+    margin-left: 10px;
 }
 
 .form-group input:focus,
