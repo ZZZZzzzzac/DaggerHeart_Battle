@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>敌人卡片编辑器</title>
+    <link rel="stylesheet" href="enemy_editor.css">
+</head>
+<body>
+    <div class="editor-container">
+        <form id="enemyForm">
+            <!-- 基本信息 -->
+            <div class="form-section">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="name">名称</label>
+                        <input type="text" id="name" name="名称" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="tier">位阶</label>
+                        <input type="text" id="tier" name="位阶" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="category">种类</label>
+                        <input type="text" id="category" name="种类">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 描述信息 -->
+            <div class="form-section">
+                <div class="form-group">
+                    <label for="intro">简介</label>
+                    <textarea id="intro" name="简介" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="tactics">动机与战术</label>
+                    <textarea id="tactics" name="动机与战术" rows="2"></textarea>
+                </div>
+            </div>
+
+            <!-- 数据统计 -->
+            <div class="form-section">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="difficulty">难度</label>
+                        <input type="text" id="difficulty" name="难度">
+                    </div>
+                     <div class="form-group">
+                        <label for="hp">生命点</label>
+                        <input type="text" id="hp" name="生命点">
+                    </div>
+                    <div class="form-group">
+                        <label for="stress">压力点</label>
+                        <input type="text" id="stress" name="压力点">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="majorThreshold">重度伤害阈值</label>
+                        <input type="text" id="majorThreshold" name="重度伤害阈值">
+                    </div>
+                    <div class="form-group">
+                        <label for="severeThreshold">严重伤害阈值</label>
+                        <input type="text" id="severeThreshold" name="严重伤害阈值">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="experiences">经历</label>
+                    <input type="text" id="experiences" name="经历" placeholder="例如：疾行+2">
+                </div>
+            </div>
+
+            <!-- 攻击信息 -->
+            <div class="form-section">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="attackHit">攻击命中</label>
+                        <input type="text" id="attackHit" name="攻击命中">
+                    </div>
+                    <div class="form-group">
+                        <label for="attackWeapon">攻击武器</label>
+                        <input type="text" id="attackWeapon" name="攻击武器">
+                    </div>
+                    <div class="form-group">
+                        <label for="attackRange">攻击范围</label>
+                        <input type="text" id="attackRange" name="攻击范围">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="attackDamage">攻击伤害</label>
+                        <input type="text" id="attackDamage" name="攻击伤害">
+                    </div>
+                    <div class="form-group">
+                        <label for="attackAttr">攻击属性</label>
+                        <input type="text" id="attackAttr" name="攻击属性">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 特性 -->
+            <div class="form-section">
+                <div class="section-header">
+                    <h2>特性</h2>
+                    <button type="button" id="addTraitBtn" class="btn secondary">+ 添加特性</button>
+                </div>
+                <div id="traitsContainer">
+                    <!-- 特性条目将在这里动态生成 -->
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn primary">生成 JSON</button>
+                <button type="button" id="clearBtn" class="btn danger">清空</button>
+            </div>
+        </form>
+    </div>
+    
+    <!-- 特性模板 -->
+    <template id="traitTemplate">
+        <div class="trait-item">
+            <div class="trait-header">
+                <span class="trait-title">新特性</span>
+                <button type="button" class="btn-icon remove-trait" title="删除">×</button>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>名称</label>
+                    <input type="text" class="trait-name" name="特性名称" required>
+                </div>
+                <div class="form-group">
+                    <label>原名</label>
+                    <input type="text" class="trait-original-name" name="特性原名">
+                </div>
+                <div class="form-group">
+                    <label>类型</label>
+                    <input type="text" class="trait-type" name="特性类型" placeholder="被动/动作/反应">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>特性描述</label>
+                <textarea class="trait-desc" name="特性描述" rows="2"></textarea>
+            </div>
+        </div>
+    </template>
+
+    <script src="enemy_editor.js"></script>
+</body>
+</html>
