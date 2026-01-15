@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
         traitItems.forEach(item => {
             const trait = {
                 "名称": item.querySelector('.trait-name').value || "",
-                "原名": item.querySelector('.trait-original-name').value || "",
+                "原名": "",
                 "类型": item.querySelector('.trait-type').value || "",
                 "特性描述": item.querySelector('.trait-desc').value || ""
             };
