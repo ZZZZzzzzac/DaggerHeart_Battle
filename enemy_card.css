@@ -1,0 +1,320 @@
+.enemy-card {
+    border: 2px solid #2c3e50;
+    border-radius: 8px;
+    padding: 8px;
+    width: 320px;
+    background: #fdfbf7; /* 稍微带点纸张色 */
+    box-shadow: 3px 3px 8px rgba(0,0,0,0.15);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    color: #333;
+    transition: transform 0.2s;
+}
+
+.enemy-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 4px 4px 12px rgba(0,0,0,0.2);
+}
+
+.card-title {
+    font-size: 1.3em;
+    font-weight: 700;
+    color: #2c3e50;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+}
+
+.card-meta {
+    font-size: 0.85em;
+    color: #666;
+    font-style: italic;
+}
+
+.card-intro {
+    font-size: 0.7em;
+    font-style: italic;
+    color: #555;
+}
+
+.card-tactics {
+    font-size: 0.85em;
+    color: #444;
+    margin-top: 4px;
+}
+
+.defense-section {
+    background: #eee;
+    padding-left: 8px;
+    padding-right: 8px;
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 0px;
+}
+
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    padding-bottom: 2px;
+}
+
+.stat-item {
+    font-size: 1.1em;
+    display: flex;
+    flex-direction: row;
+    align-items: baseline;
+    gap: 6px;
+}
+
+.stat-item-right {
+    text-align: right;
+}
+
+.stat-label {
+    font-weight: bold;
+    font-size: 0.8em;
+    color: #555;
+    text-transform: uppercase;
+}
+
+.stat-value {
+    font-weight: 600;
+}
+
+.experience-row {
+    font-size: 0.9em;
+}
+
+.points-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0px;
+}
+
+.point-row {
+    display: flex;
+    align-items: center;
+    gap: 0px;
+}
+
+.point-label {
+    font-weight: bold;
+    width: 60px;
+    font-size: 0.9em;
+}
+
+.checkbox-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.point-checkbox {
+    width: 14px;
+    height: 14px;
+    border: 1px solid #333;
+    background: #fff;
+    cursor: pointer;
+    border-radius: 2px;
+}
+
+.point-checkbox:hover {
+    background: #ddd;
+}
+
+.point-checkbox.filled {
+    background: #c0392b; /* 红色代表血量/压力 */
+    border-color: #a93226;
+}
+
+.point-checkbox.stress-filled {
+    background: #8e44ad; /* 紫色代表压力 */
+    border-color: #7d3c98;
+}
+
+.attack-section {
+    background: #e8f6f3;
+    border-left: 3px solid #1abc9c;
+    padding: 6px;
+    font-size: 0.9em;
+}
+
+.attack-header {
+    font-weight: bold;
+    color: #16a085;
+    margin-bottom: 2px;
+}
+
+.attack-content {
+    font-weight: bold;
+    color: #16a085;
+}
+
+.attack-separator {
+    color: #aaa;
+    margin: 0 4px;
+}
+
+.traits-section {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.trait-card {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 2px 5px;
+    cursor: pointer;
+    transition: background 0.1s;
+    line-height: 1.2;
+}
+
+.trait-card:hover {
+    background: #f8f9fa;
+    border-color: #bbb;
+}
+
+.trait-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9em;
+    margin:0px;
+}
+
+.trait-card .trait-name {
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+.trait-card .trait-type {
+    font-size: 0.75em;
+    background: #ecf0f1;
+    padding: 1px 4px;
+    border-radius: 3px;
+    color: #7f8c8d;
+}
+
+.trait-card .trait-desc {
+    display: none;
+    margin-top: 6px;
+    font-size: 0.85em;
+    color: #444;
+    line-height: 1.4;
+    border-top: 1px solid #eee;
+    padding-top: 4px;
+}
+
+.trait-desc b,
+.trait-desc i {
+    color: #c0392b; /* 深红色高亮 */
+}
+
+.trait-card.expanded .trait-desc {
+    display: block;
+}
+
+.note-section {
+    margin-top: auto;
+}
+
+.note-input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 4px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 0.9em;
+    resize: vertical;
+    min-height: 30px;
+    height: 30px;
+}
+
+.note-input:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 3px rgba(52, 152, 219, 0.3);
+}
+
+/* 阈值显示样式 */
+.thresholds {
+    display: flex;
+    gap: 10px;
+    font-size: 0.85em;
+    color: #666;
+    margin-top: 2px;
+}
+
+.threshold-separator {
+    margin: 0 0px;
+}
+
+/* --- Demo / Test Page Styles --- */
+
+.demo-body {
+    background-color: #f0f2f5;
+    padding: 20px;
+    font-family: sans-serif;
+}
+
+.demo-header {
+    margin-bottom: 20px;
+}
+
+.cards-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+/* 模态框样式 */
+.modal {
+    display: none; 
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%; 
+    background: rgba(0,0,0,0.5); 
+    z-index: 1000;
+    overflow-y: auto;
+}
+
+.modal-content {
+    background: white;
+    margin: 20px auto;
+    padding: 20px;
+    width: 90%;
+    max-width: 800px;
+    border-radius: 8px;
+    position: relative;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+.close-modal {
+    position: absolute;
+    right: 15px;
+    top: 10px;
+    font-size: 24px;
+    cursor: pointer;
+    color: #666;
+    z-index: 1001;
+}
+
+.close-modal:hover {
+    color: #000;
+}
+
+.modal-content .editor-container {
+    /* 覆盖 enemy_editor.css 中的 margin，适应模态框 */
+    margin: 0;
+    max-width: none;
+    box-shadow: none;
+}
