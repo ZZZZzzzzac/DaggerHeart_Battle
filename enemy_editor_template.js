@@ -38,6 +38,10 @@ const ENEMY_EDITOR_HTML = `
                         </select>
                         <span class="dropdown-arrow">▼</span>
                     </div>
+                    <div class="form-group">
+                        <label for="source">来源</label>
+                        <input type="text" id="source" name="来源">
+                    </div>
                     <div class="form-group" style="flex: 0 0 auto;">
                         <button type="button" id="applyTemplateBtn" class="btn secondary" style="height: 100%; margin: 0; padding: 0 15px;">使用模板</button>
                     </div>

@@ -39,6 +39,21 @@
     color: #555;
 }
 
+.card-source {
+    text-align: right;
+    font-size: 0.8em;
+    color: #888;
+    font-style: italic;
+}
+
+.card-source-inline {
+    font-size: 0.6em; /* Slightly smaller than title */
+    color: #888;
+    font-weight: normal;
+    font-style: italic;
+    margin-left: 4px;
+}
+
 .card-tactics {
     font-size: 0.85em;
     color: #444;
@@ -58,6 +73,7 @@
 .stat-row {
     display: flex;
     justify-content: space-between;
+    padding-bottom: 2px;
 }
 
 .stat-item {
@@ -90,13 +106,13 @@
 .points-section {
     display: flex;
     flex-direction: column;
-    gap: 0px;
+    gap: 6px;
 }
 
 .point-row {
     display: flex;
     align-items: center;
-    gap: 0px;
+    gap: 8px;
 }
 
 .point-label {

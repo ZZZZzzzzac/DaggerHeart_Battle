@@ -105,6 +105,7 @@
             document.getElementById('name').value = data['名称'] || '';
             document.getElementById('tier').value = data['位阶'] || '';
             document.getElementById('category').value = data['种类'] || '';
+            document.getElementById('source').value = data['来源'] || '';
             document.getElementById('intro').value = data['简介'] || '';
             document.getElementById('tactics').value = data['动机与战术'] || '';
             document.getElementById('experiences').value = data['经历'] || '';
@@ -155,6 +156,7 @@
                 currentEditingData['名称'] = formData.get('名称');
                 currentEditingData['位阶'] = formData.get('位阶');
                 currentEditingData['种类'] = formData.get('种类');
+                currentEditingData['来源'] = formData.get('来源');
                 currentEditingData['简介'] = formData.get('简介');
                 currentEditingData['动机与战术'] = formData.get('动机与战术');
                 currentEditingData['经历'] = formData.get('经历');
