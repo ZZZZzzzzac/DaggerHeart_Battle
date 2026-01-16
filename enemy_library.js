@@ -193,6 +193,7 @@ class EnemyLibrary {
                             <option value="潜伏">潜伏</option>
                             <option value="社交">社交</option>
                             <option value="辅助">辅助</option>
+                            <option value="集群">集群</option>
                         </select>
                     </div>
                 </div>
@@ -303,7 +304,13 @@ class EnemyLibrary {
             // 位阶
             if (this.filters.tier && String(enemy['位阶']) !== this.filters.tier) return false;
             // 种类
-            if (this.filters.category && enemy['种类'] !== this.filters.category) return false;
+            if (this.filters.category) {
+                if (this.filters.category === '集群') {
+                    if (!enemy['种类'] || !enemy['种类'].startsWith('集群')) return false;
+                } else {
+                    if (enemy['种类'] !== this.filters.category) return false;
+                }
+            }
             return true;
         });
 
@@ -351,13 +358,13 @@ class EnemyLibrary {
                     <span class="item-name">${enemy['名称']}</span>
                     <div style="display:flex; align-items:center; gap:6px;">
                         <div class="source-tag ${sourceClass}" title="${sourceTitle}" style="position:static; margin:0;"></div>
-                        <span class="item-tier">Tier ${enemy['位阶']}</span>
+                        <span class="item-tier">位阶 ${enemy['位阶']}</span>
                         <button class="lib-item-delete" title="删除">×</button>
                     </div>
                 </div>
                 <div class="item-details">
                     <span class="item-tag">${enemy['种类']}</span>
-                    <span class="item-tag">Diff ${enemy['难度']}</span>
+                    <span class="item-tag">难度 ${enemy['难度']}</span>
                 </div>
             `;
 
