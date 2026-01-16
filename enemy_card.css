@@ -2,7 +2,7 @@
     border: 2px solid #2c3e50;
     border-radius: 8px;
     padding: 8px;
-    width: 320px;
+    width: 280px;
     background: #fdfbf7; /* 稍微带点纸张色 */
     box-shadow: 3px 3px 8px rgba(0,0,0,0.15);
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -100,7 +100,6 @@
 
 .point-label {
     font-weight: bold;
-    width: 60px;
     font-size: 0.9em;
 }
 
@@ -153,7 +152,7 @@
 
 .attack-separator {
     color: #aaa;
-    margin: 0 4px;
+    margin: 0 0px;
 }
 
 .traits-section {

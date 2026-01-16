@@ -132,49 +132,15 @@ class BattlePanel {
         // 绑定表单提交
         if (this.enemyForm) {
             this.enemyForm.addEventListener('submit', (e) => {
-                // 注意：enemy_editor.js 可能已经有 preventDefault，但这里是额外的逻辑
-                // 我们需要收集数据。由于 enemy_editor.js 只是 log 了数据，并没有暴露出来，
-                // 我们需要再次从 DOM 收集。
+                // 防止默认提交（如果 enemy_editor.js 没有绑定的话）
+                e.preventDefault();
                 
-                const formData = new FormData(this.enemyForm);
-                
-                // 基础数据
-                const newData = {
-                    "名称": formData.get('名称'),
-                    "位阶": formData.get('位阶'),
-                    "种类": formData.get('种类'),
-                    "简介": formData.get('简介'),
-                    "动机与战术": formData.get('动机与战术'),
-                    "经历": formData.get('经历'),
-                    "难度": formData.get('难度'),
-                    "生命点": formData.get('生命点'),
-                    "压力点": formData.get('压力点'),
-                    "重度伤害阈值": formData.get('重度伤害阈值'),
-                    "严重伤害阈值": formData.get('严重伤害阈值'),
-                    "攻击命中": formData.get('攻击命中'),
-                    "攻击武器": formData.get('攻击武器'),
-                    "攻击范围": formData.get('攻击范围'),
-                    "攻击伤害": formData.get('攻击伤害'),
-                    "攻击属性": formData.get('攻击属性'),
-                    "特性": []
-                };
+                if (typeof window.collectEnemyEditorData !== 'function') {
+                    console.error('collectEnemyEditorData function not found');
+                    return;
+                }
 
-                // 获取来源
-                newData['来源'] = formData.get('来源');
-                if (!newData['来源']) newData['来源'] = '自定义';
-
-                // 收集特性
-                const traitItems = document.getElementById('traitsContainer').querySelectorAll('.trait-item');
-                traitItems.forEach(item => {
-                    const name = item.querySelector('.trait-name').value;
-                    if (name) {
-                        newData['特性'].push({
-                            '名称': name,
-                            '类型': item.querySelector('.trait-type').value,
-                            '特性描述': item.querySelector('.trait-desc').value
-                        });
-                    }
-                });
+                const newData = window.collectEnemyEditorData();
 
                 // 区分是 Library 还是 Battle 编辑
                 if (this.editContext === 'library') {
@@ -283,7 +249,7 @@ class BattlePanel {
 
     updatePoints() {
         const budget = (3 * this.pcCount) + 2;
-        this.budgetDisplay.textContent = `预算: ${budget}`;
+        this.budgetDisplay.textContent = `战斗点数: ${budget}`;
 
         let totalPoints = 0;
         let minionCount = 0;

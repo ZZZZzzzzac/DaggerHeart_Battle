@@ -61,13 +61,16 @@ class EnemyLibrary {
             }
         }
         
-        // 如果本地没有数据，且存在默认数据 ADVERSARY，则加载默认数据
-        if (this.enemies.length === 0 && typeof ADVERSARY !== 'undefined') {
-            this.enemies = ADVERSARY.map(e => ({
-                ...e,
-                '来源': '核心书'
-            }));
-            this.saveData();
+        // 如果本地没有数据，加载默认数据
+        if (this.enemies.length === 0) {
+            let defaults = [];
+            if (typeof ADVERSARY_CRB !== 'undefined') defaults = defaults.concat(ADVERSARY_CRB);
+            if (typeof ADVERSARY_VOID !== 'undefined') defaults = defaults.concat(ADVERSARY_VOID);
+            
+            if (defaults.length > 0) {
+                this.enemies = defaults;
+                this.saveData();
+            }
         }
     }
 
@@ -96,12 +99,22 @@ class EnemyLibrary {
         }
     }
 
-    // 导出数据
+    // 导出数据 (全部)
     exportData() {
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(this.enemies, null, 2));
+        this.downloadJson(this.enemies, "enemy_library_all.json");
+    }
+
+    // 导出数据 (当前筛选)
+    exportFilteredData() {
+        this.downloadJson(this.filteredEnemies, "enemy_library_filtered.json");
+    }
+
+    // 辅助下载
+    downloadJson(data, filename) {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data, null, 2));
         const downloadAnchorNode = document.createElement('a');
         downloadAnchorNode.setAttribute("href", dataStr);
-        downloadAnchorNode.setAttribute("download", "enemy_library_export.json");
+        downloadAnchorNode.setAttribute("download", filename);
         document.body.appendChild(downloadAnchorNode); // required for firefox
         downloadAnchorNode.click();
         downloadAnchorNode.remove();
@@ -152,61 +165,6 @@ class EnemyLibrary {
     }
 
     renderUI() {
-        this.container.classList.add('library-container');
-        this.container.innerHTML = `
-            <div class="library-header">
-                <div class="library-title">
-                    <span>敌人库</span>
-                    <span style="font-size:0.8em;color:#666;" id="lib-count">0</span>
-                </div>
-                <div class="library-actions">
-                    <button class="lib-btn primary" id="lib-btn-new">新建</button>
-                    <button class="lib-btn" id="lib-btn-export">导出</button>
-                    <label class="lib-btn" style="text-align:center; margin:0;">
-                        导入 <input type="file" id="lib-file-import" style="display:none;" accept=".json">
-                    </label>
-                </div>
-                <div class="filter-section">
-                    <input type="text" class="search-input" id="lib-search" placeholder="搜索名称...">
-                    <div class="filter-row">
-                        <select class="filter-select" id="lib-filter-source">
-                            <option value="">所有来源</option>
-                            <!-- 动态填充 -->
-                        </select>
-                        <select class="filter-select" id="lib-filter-tier">
-                            <option value="">所有位阶</option>
-                            <option value="1">1</option>
-                            <option value="2">2</option>
-                            <option value="3">3</option>
-                            <option value="4">4</option>
-                        </select>
-                        <select class="filter-select" id="lib-filter-category">
-                            <option value="">所有种类</option>
-                            <option value="标准">标准</option>
-                            <option value="杂兵">杂兵</option>
-                            <option value="头目">头目</option>
-                            <option value="独狼">独狼</option>
-                            <option value="斗士">斗士</option>
-                            <option value="远程">远程</option>
-                            <option value="潜伏">潜伏</option>
-                            <option value="社交">社交</option>
-                            <option value="辅助">辅助</option>
-                            <option value="集群">集群</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="sort-controls">
-                    排序: 
-                    <button class="sort-btn" data-sort="位阶">位阶</button> |
-                    <button class="sort-btn" data-sort="种类">种类</button> |
-                    <button class="sort-btn" data-sort="来源">来源</button>
-                </div>
-            </div>
-            <div class="enemy-list" id="lib-list">
-                <!-- 列表内容 -->
-            </div>
-        `;
-
         this.bindEvents();
     }
 
@@ -251,6 +209,10 @@ class EnemyLibrary {
 
         this.container.querySelector('#lib-btn-export').addEventListener('click', () => {
             this.exportData();
+        });
+
+        this.container.querySelector('#lib-btn-export-current').addEventListener('click', () => {
+            this.exportFilteredData();
         });
 
         this.container.querySelector('#lib-file-import').addEventListener('change', (e) => {
@@ -302,13 +264,7 @@ class EnemyLibrary {
             // 位阶
             if (this.filters.tier && String(enemy['位阶']) !== this.filters.tier) return false;
             // 种类
-            if (this.filters.category) {
-                if (this.filters.category === '集群') {
-                    if (!enemy['种类'] || !enemy['种类'].startsWith('集群')) return false;
-                } else {
-                    if (enemy['种类'] !== this.filters.category) return false;
-                }
-            }
+            if (this.filters.category && enemy['种类'] !== this.filters.category) return false;
             return true;
         });
 
@@ -363,6 +319,7 @@ class EnemyLibrary {
                     <span class="item-name">${enemy['名称']}</span>
                     <div style="display:flex; align-items:center; gap:6px;">
                         <div class="source-tag ${sourceClass}" title="${sourceTitle}" style="position:static; margin:0;"></div>
+                        <span class="item-tier">${enemy['来源'] || '自定义'}</span>
                         <span class="item-tier">位阶 ${enemy['位阶']}</span>
                         <span class="item-tier">${enemy['种类']}</span>
                         <button class="lib-item-delete" title="删除">×</button>

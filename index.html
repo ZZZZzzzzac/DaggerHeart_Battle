@@ -12,26 +12,81 @@
 <body>
 
     <!-- 左侧敌人库 -->
-    <div id="library-wrapper"></div>
+    <div id="library-wrapper" class="library-container">
+        <div class="library-header">
+            <div class="library-title">
+                <span>敌人库</span>
+                <span style="font-size:0.8em;color:#666;" id="lib-count">0</span>
+                            <div class="sort-controls">
+                排序:
+                <button class="sort-btn" data-sort="位阶">位阶</button> |
+                <button class="sort-btn" data-sort="种类">种类</button> |
+                <button class="sort-btn" data-sort="来源">来源</button>
+            </div>
+            </div>
+            <div class="library-actions">
+                <button class="lib-btn primary" id="lib-btn-new">新建</button>
+                <button class="lib-btn" id="lib-btn-export">导出所有</button>
+                <button class="lib-btn" id="lib-btn-export-current" title="导出当前筛选结果">导出当前</button>
+                <label class="lib-btn" style="text-align:center; margin:0;">
+                    导入 <input type="file" id="lib-file-import" style="display:none;" accept=".json">
+                </label>
+            </div>
+            <div class="filter-section">
+                <input type="text" class="search-input" id="lib-search" placeholder="搜索名称...">
+                <div class="filter-row">
+                    <select class="filter-select" id="lib-filter-source" title="筛选来源">
+                        <option value="">所有来源</option>
+                        <!-- 动态填充 -->
+                    </select>
+                    <select class="filter-select" id="lib-filter-tier" title="筛选位阶">
+                        <option value="">所有位阶</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                    </select>
+                    <select class="filter-select" id="lib-filter-category" title="筛选种类">
+                        <option value="">所有种类</option>
+                        <option value="标准">标准</option>
+                        <option value="杂兵">杂兵</option>
+                        <option value="头目">头目</option>
+                        <option value="独狼">独狼</option>
+                        <option value="斗士">斗士</option>
+                        <option value="远程">远程</option>
+                        <option value="潜伏">潜伏</option>
+                        <option value="社交">社交</option>
+                        <option value="辅助">辅助</option>
+                        <option value="集群">集群</option>
+                    </select>
+                </div>
+            </div>
+
+        </div>
+        <div class="enemy-list" id="lib-list">
+            <!-- 列表内容 -->
+        </div>
+    </div>
 
     <!-- 右侧战斗面板 -->
     <div id="battle-panel">
         <div id="battle-toolbar">
             <div class="toolbar-group">
-                <label>PC数量: <input type="number" id="pc-count" value="4" min="1" style="width: 50px;"></label>
-                <span id="battle-budget" class="point-display" title="预算 = (3 × PC数) + 2">预算: --</span>
+                <label>PC数量: <input type="number" id="pc-count" value="4" min="1"></label>
+                <span id="battle-budget" class="point-display" title="战斗点数 = (3 × PC数) + 2">战斗点数: --</span>
                 <span id="current-points" class="point-display">当前: 0</span>
             </div>
             <div class="toolbar-group">
-                <button id="btn-clear-battle" class="btn danger">清空面板</button>
-                <label class="btn secondary" style="margin:0; cursor:pointer;">
-                    导入面板 <input type="file" id="file-import-battle" style="display:none;" accept=".json">
+                <button id="btn-clear-battle" class="btn secondary danger">清空面板</button>
+                <label class="btn secondary">
+                    导入面板
+                    <input type="file" id="file-import-battle" style="display:none;" accept=".json">
                 </label>
                 <button id="btn-export-battle" class="btn secondary">导出面板</button>
             </div>
         </div>
         <div id="battle-area">
-            <div class="empty-tip">从左侧拖拽敌人卡片到此处</div>
+            <div class="empty-tip">从左侧拖拽敌人卡片到此处<br>右键卡片可以修改数据</div>            
         </div>
     </div>
 
@@ -49,10 +104,10 @@
                                     <label for="name">名称</label>
                                     <input type="text" id="name" name="名称" required>
                                 </div>
-                                <div class="form-group" style="position: relative;">
+                                <div class="form-group">
                                     <label for="tier">位阶</label>
                                     <input type="text" id="tier" name="位阶" required>
-                                    <select class="dropdown-trigger" onchange="this.previousElementSibling.value=this.value; this.selectedIndex=0;">
+                                    <select class="dropdown-trigger" title="选择位阶" onchange="this.previousElementSibling.value=this.value; this.selectedIndex=0;">
                                         <option value="" disabled selected></option>
                                         <option value="1">1</option>
                                         <option value="2">2</option>
@@ -61,10 +116,10 @@
                                     </select>
                                     <span class="dropdown-arrow">▼</span>
                                 </div>
-                                <div class="form-group" style="position: relative;">
+                                <div class="form-group">
                                     <label for="category">种类</label>
                                     <input type="text" id="category" name="种类">
-                                    <select id="category-select" class="dropdown-trigger" onchange="this.previousElementSibling.value=this.value; this.selectedIndex=0;">
+                                    <select id="category-select" class="dropdown-trigger" title="选择种类" onchange="this.previousElementSibling.value=this.value; this.selectedIndex=0;">
                                         <option value="" disabled selected></option>
                                         <option value="斗士">斗士</option>
                                         <option value="集群">集群</option>
@@ -135,9 +190,9 @@
                                 <div class="form-group">
                                     <input type="text" id="attackWeapon" name="攻击武器" placeholder="武器">
                                 </div>
-                                <div class="form-group" style="position: relative;">
+                                <div class="form-group">
                                     <input type="text" id="attackRange" name="攻击范围" placeholder="范围">
-                                    <select class="dropdown-trigger" onchange="this.previousElementSibling.value=this.value; this.selectedIndex=0;">
+                                    <select class="dropdown-trigger" title="选择攻击范围" onchange="this.previousElementSibling.value=this.value; this.selectedIndex=0;">
                                         <option value="" disabled selected></option>
                                         <option value="近战">近战</option>
                                         <option value="邻近">邻近</option>
@@ -150,9 +205,9 @@
                                 <div class="form-group">
                                     <input type="text" id="attackDamage" name="攻击伤害" placeholder="伤害骰">
                                 </div>
-                                <div class="form-group" style="position: relative;">
+                                <div class="form-group">
                                     <input type="text" id="attackAttr" name="攻击属性" placeholder="属性">
-                                    <select class="dropdown-trigger" onchange="this.previousElementSibling.value=this.value; this.selectedIndex=0;">
+                                    <select class="dropdown-trigger" title="选择攻击属性" onchange="this.previousElementSibling.value=this.value; this.selectedIndex=0;">
                                         <option value="" disabled selected></option>
                                         <option value="物理">物理</option>
                                         <option value="魔法">魔法</option>
@@ -181,18 +236,18 @@
                 <template id="traitTemplate">
                     <div class="trait-item">
                         <div class="form-row">
-                            <div class="form-group" style="position: relative;">
+                            <div class="form-group">
                                 <label>特性名称</label>
                                 <input type="text" class="trait-name" name="特性名称" placeholder="特性名称" required>
-                                <select class="dropdown-trigger trait-name-select">
+                                <select class="dropdown-trigger trait-name-select" title="选择特性">
                                     <option value="" disabled selected></option>
                                 </select>
                                 <span class="dropdown-arrow">▼</span>
                             </div>
-                            <div class="form-group" style="position: relative;">
+                            <div class="form-group">
                                 <label>特性类型</label>
                                 <input type="text" class="trait-type" name="特性类型" placeholder="被动/动作/反应">
-                                <select class="dropdown-trigger" onchange="this.previousElementSibling.value=this.value; this.selectedIndex=0;">
+                                <select class="dropdown-trigger" title="选择特性类型" onchange="this.previousElementSibling.value=this.value; this.selectedIndex=0;">
                                     <option value="" disabled selected></option>
                                     <option value="被动">被动</option>
                                     <option value="动作">动作</option>
@@ -213,7 +268,8 @@
     </div>
 
     <!-- 脚本 -->
-    <script src="敌人数据块.js"></script>
+    <script src="data/核心书.js"></script>
+    <script src="data/VOID.js"></script>
     <script src="enemy_card.js"></script>
     <script src="enemy_editor.js"></script>
     <script src="enemy_library.js"></script>

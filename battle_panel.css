@@ -85,8 +85,9 @@ body {
 /* 战斗面板上的卡片容器 */
 .battle-card-wrapper {
     position: relative;
-    width: 320px; 
+    width: 280px; 
     transition: transform 0.2s;
+    padding-right:10px;
 }
 
 .battle-card-wrapper:hover {
@@ -131,4 +132,5 @@ body {
     padding: 5px;
     border: 1px solid #ced4da;
     border-radius: 4px;
+    width: 30px;
 }

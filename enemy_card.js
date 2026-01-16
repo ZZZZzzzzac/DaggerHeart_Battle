@@ -39,7 +39,7 @@ function renderEnemyCard(enemyData) {
                     <span class="stat-value">${enemyData['难度'] || '-'}</span>
                 </div>
                 <div class="stat-item stat-item-right">
-                    <span class="stat-label">伤害阈值</span>
+                    <span class="stat-label">阈值</span>
                     <div class="thresholds">
                         <span title="重度">${enemyData['重度伤害阈值'] || '-'}</span>
                         <span class="threshold-separator">/</span>
@@ -69,8 +69,8 @@ function renderEnemyCard(enemyData) {
     const attackHtml = `
         <div class="attack-section">
             <div class="attack-content">
-                攻击：${enemyData['攻击命中'] || '-'} <span class="attack-separator">|</span>
-                ${enemyData['攻击武器'] || '-'}：${enemyData['攻击范围'] || '-'} <span class="attack-separator">|</span>
+                攻击${enemyData['攻击命中'] || '-'} <span class="attack-separator">|</span>
+                ${enemyData['攻击武器'] || '-'}: ${enemyData['攻击范围'] || '-'} <span class="attack-separator">|</span>
                 ${enemyData['攻击伤害'] || '-'} ${enemyData['攻击属性'] || '-'}
             </div>
         </div>
