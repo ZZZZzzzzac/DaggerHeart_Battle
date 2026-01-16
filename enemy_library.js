@@ -24,7 +24,7 @@ class EnemyLibrary {
             search: '',
             tier: '',
             category: '',
-            source: ''
+            source: '' // 这里的 source 指的是“来源”字段的值
         };
         
         this.sort = {
@@ -47,23 +47,24 @@ class EnemyLibrary {
         if (stored) {
             try {
                 this.enemies = JSON.parse(stored);
-                // 兼容性修复：为已存在的默认数据添加“来源”字段
+                // 兼容性修复：确保所有数据都有“来源”
                 this.enemies.forEach(e => {
-                    if (e.source === 'default' && !e['来源']) {
-                        e['来源'] = '核心书';
+                    if (!e['来源']) {
+                        e['来源'] = '自定义';
                     }
+                    // 清理旧的 source 字段
+                    if (e.source) delete e.source;
                 });
             } catch (e) {
                 console.error('Failed to parse enemy library data', e);
                 this.enemies = [];
             }
-        } 
+        }
         
         // 如果本地没有数据，且存在默认数据 ADVERSARY，则加载默认数据
         if (this.enemies.length === 0 && typeof ADVERSARY !== 'undefined') {
             this.enemies = ADVERSARY.map(e => ({
-                ...e, 
-                source: 'default',
+                ...e,
                 '来源': '核心书'
             }));
             this.saveData();
@@ -76,10 +77,6 @@ class EnemyLibrary {
 
     // 添加或更新敌人
     saveEnemy(enemyData, index = -1) {
-        // 标记为自定义来源 (内部标记，用于颜色区分等，如果还需要的话)
-        // 但现在主要依靠近 '来源' 字段
-        enemyData.source = enemyData.source || 'custom';
-        
         if (index >= 0) {
             this.enemies[index] = enemyData;
         } else {
@@ -131,7 +128,8 @@ class EnemyLibrary {
                         // 检查同名
                         const exists = this.enemies.some(existing => existing['名称'] === importedEnemy['名称']);
                         if (!exists) {
-                            importedEnemy.source = 'custom';
+                            // 清理旧 source
+                            if (importedEnemy.source) delete importedEnemy.source;
                             this.enemies.push(importedEnemy);
                             addedCount++;
                         } else {
@@ -348,10 +346,10 @@ class EnemyLibrary {
             const item = document.createElement('div');
             item.className = 'enemy-list-item';
             
-            // 来源标记颜色 (可选保留)
-            const sourceClass = enemy.source === 'default' ? 'source-default' : 'source-custom';
-            // 显示来源名称作为 title
-            const sourceTitle = enemy['来源'] || (enemy.source === 'default' ? '核心书' : '自定义');
+            // 来源标记颜色
+            const isCore = enemy['来源'] === '核心书';
+            const sourceClass = isCore ? 'source-default' : 'source-custom';
+            const sourceTitle = enemy['来源'] || '自定义';
 
             // 支持拖拽
             item.setAttribute('draggable', 'true');

@@ -28,7 +28,7 @@ body {
 }
 
 #battle-toolbar {
-    height: 60px;
+    min-height: 60px;
     background: #fff;
     border-bottom: 1px solid #dee2e6;
     display: flex;

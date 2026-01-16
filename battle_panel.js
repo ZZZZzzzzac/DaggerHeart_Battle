@@ -33,7 +33,6 @@ class BattlePanel {
 
         // 初始化左侧敌人库 (复用 EnemyLibrary 类)
         // 我们不需要 library 的 onSelect 做什么，因为主要是拖拽
-        // 但我们可以允许右键编辑库里的模版
         this.library = new EnemyLibrary('library-wrapper', {
             onSelect: (enemyData) => {
                 // 可选：点击库里的项，可以高亮或者做点什么
@@ -131,21 +130,19 @@ class BattlePanel {
         });
 
         // 绑定表单提交
-        // 注意：因为 Library 和 Battle 共用一个 Form，我们需要区分当前是为谁提交
-        // 我们使用一个 currentSubmitHandler 变量来动态切换，或者在提交时检查状态
         if (this.enemyForm) {
-            // 移除可能存在的旧监听器 (如果是重新加载脚本的话)，但这里我们只添加一次
-            // 为了避免冲突，我们可以在 openEditor 时重新赋值 form.onsubmit，或者在这里统一处理
-            
             this.enemyForm.addEventListener('submit', (e) => {
-                // 获取表单数据 (复用 enemy_library.html 中的逻辑)
-                // 这里我们手动收集，或者调用一个辅助函数
+                // 注意：enemy_editor.js 可能已经有 preventDefault，但这里是额外的逻辑
+                // 我们需要收集数据。由于 enemy_editor.js 只是 log 了数据，并没有暴露出来，
+                // 我们需要再次从 DOM 收集。
+                
                 const formData = new FormData(this.enemyForm);
+                
+                // 基础数据
                 const newData = {
                     "名称": formData.get('名称'),
                     "位阶": formData.get('位阶'),
                     "种类": formData.get('种类'),
-                    "来源": formData.get('来源'),
                     "简介": formData.get('简介'),
                     "动机与战术": formData.get('动机与战术'),
                     "经历": formData.get('经历'),
@@ -162,6 +159,11 @@ class BattlePanel {
                     "特性": []
                 };
 
+                // 获取来源
+                newData['来源'] = formData.get('来源');
+                if (!newData['来源']) newData['来源'] = '自定义';
+
+                // 收集特性
                 const traitItems = document.getElementById('traitsContainer').querySelectorAll('.trait-item');
                 traitItems.forEach(item => {
                     const name = item.querySelector('.trait-name').value;
@@ -177,7 +179,6 @@ class BattlePanel {
                 // 区分是 Library 还是 Battle 编辑
                 if (this.editContext === 'library') {
                     this.library.saveEnemy(newData, this.editIndex);
-                    // 库的保存会自动重绘库列表
                 } else if (this.editContext === 'battle') {
                     this.updateEnemyInBattle(this.editId, newData);
                 }
@@ -236,10 +237,7 @@ class BattlePanel {
     updateEnemyInBattle(id, newData) {
         const index = this.enemies.findIndex(e => e.id === id);
         if (index !== -1) {
-            // 保留原有的一些运行时状态 (如当前 HP) 如果需要的话
-            // 但通常编辑意味着重置或者完全覆盖。
-            // 考虑到编辑可能改了最大HP，最好是保留比例或者直接重置？
-            // 简单起见，保留 note，其他覆盖
+            // 保留运行时状态 (如当前 HP)
             const oldData = this.enemies[index].data;
             newData._note = oldData._note;
             newData._currentHp = Math.min(newData['生命点'], oldData._currentHp || 0); // 防止溢出
@@ -310,12 +308,11 @@ class BattlePanel {
             }
         });
 
-        // 计算杂兵点数: PC数个杂兵 = 1点
+        // 计算杂兵点数: PC数个杂兵 = 1点 (即每个杂兵 1/PC 点)
         if (minionCount > 0) {
             totalPoints += (minionCount / this.pcCount);
         }
 
-        // 格式化显示 (如果是整数则显示整数，否则保留2位小数)
         const displayPoints = Number.isInteger(totalPoints) ? totalPoints : totalPoints.toFixed(2);
         
         this.currentPointsDisplay.textContent = `当前: ${displayPoints}`;
@@ -368,6 +365,11 @@ class BattlePanel {
                     // 验证数据结构
                     const validData = importedData.filter(item => item.id && item.data);
                     if (validData.length > 0) {
+                        // 清理旧 source
+                        validData.forEach(item => {
+                            if (item.data && item.data.source) delete item.data.source;
+                        });
+                        
                         this.enemies = validData;
                         this.render();
                         this.saveState();
@@ -387,28 +389,30 @@ class BattlePanel {
     }
 }
 
-// 辅助函数 (从 enemy_library.html 移动过来的逻辑，因为现在 library.html 的脚本不在 index.html 中)
-// 我们需要确保这些函数是全局可用的，或者作为 BattlePanel 的方法
-// 为了兼容 enemy_library.html 中的原有逻辑，我们可以把它们放在全局
-
+// 辅助函数
 function fillEditor(data) {
-    document.getElementById('name').value = data['名称'] || '';
-    document.getElementById('tier').value = data['位阶'] || '';
-    document.getElementById('category').value = data['种类'] || '';
-    document.getElementById('source').value = data['来源'] || ''; // 注意：HTML模板里可能有也可能没有这个字段，需要检查
-    document.getElementById('intro').value = data['简介'] || '';
-    document.getElementById('tactics').value = data['动机与战术'] || '';
-    document.getElementById('experiences').value = data['经历'] || '';
-    document.getElementById('difficulty').value = data['难度'] || '';
-    document.getElementById('hp').value = data['生命点'] || '';
-    document.getElementById('stress').value = data['压力点'] || '';
-    document.getElementById('majorThreshold').value = data['重度伤害阈值'] || '';
-    document.getElementById('severeThreshold').value = data['严重伤害阈值'] || '';
-    document.getElementById('attackHit').value = data['攻击命中'] || '';
-    document.getElementById('attackWeapon').value = data['攻击武器'] || '';
-    document.getElementById('attackRange').value = data['攻击范围'] || '';
-    document.getElementById('attackDamage').value = data['攻击伤害'] || '';
-    document.getElementById('attackAttr').value = data['攻击属性'] || '';
+    const setValue = (id, val) => {
+        const el = document.getElementById(id);
+        if (el) el.value = val || '';
+    };
+
+    setValue('name', data['名称']);
+    setValue('tier', data['位阶']);
+    setValue('category', data['种类']);
+    setValue('source', data['来源']);
+    setValue('intro', data['简介']);
+    setValue('tactics', data['动机与战术']);
+    setValue('experiences', data['经历']);
+    setValue('difficulty', data['难度']);
+    setValue('hp', data['生命点']);
+    setValue('stress', data['压力点']);
+    setValue('majorThreshold', data['重度伤害阈值']);
+    setValue('severeThreshold', data['严重伤害阈值']);
+    setValue('attackHit', data['攻击命中']);
+    setValue('attackWeapon', data['攻击武器']);
+    setValue('attackRange', data['攻击范围']);
+    setValue('attackDamage', data['攻击伤害']);
+    setValue('attackAttr', data['攻击属性']);
 
     const traitsContainer = document.getElementById('traitsContainer');
     const addTraitBtn = document.getElementById('addTraitBtn');
@@ -431,7 +435,8 @@ function fillEditor(data) {
 function resetEditor() {
     document.getElementById('enemyForm').reset();
     document.getElementById('traitsContainer').innerHTML = '';
-    document.getElementById('addTraitBtn').click(); 
+    const addTraitBtn = document.getElementById('addTraitBtn');
+    if(addTraitBtn) addTraitBtn.click(); 
 }
 
 // 启动应用
