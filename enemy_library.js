@@ -353,19 +353,24 @@ class EnemyLibrary {
             // 显示来源名称作为 title
             const sourceTitle = enemy['来源'] || (enemy.source === 'default' ? '核心书' : '自定义');
 
+            // 支持拖拽
+            item.setAttribute('draggable', 'true');
+            item.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('application/json', JSON.stringify(enemy));
+                e.dataTransfer.effectAllowed = 'copy';
+            });
+
             item.innerHTML = `
                 <div class="item-header">
                     <span class="item-name">${enemy['名称']}</span>
                     <div style="display:flex; align-items:center; gap:6px;">
                         <div class="source-tag ${sourceClass}" title="${sourceTitle}" style="position:static; margin:0;"></div>
                         <span class="item-tier">位阶 ${enemy['位阶']}</span>
+                        <span class="item-tier">${enemy['种类']}</span>
                         <button class="lib-item-delete" title="删除">×</button>
                     </div>
                 </div>
-                <div class="item-details">
-                    <span class="item-tag">${enemy['种类']}</span>
-                    <span class="item-tag">难度 ${enemy['难度']}</span>
-                </div>
+
             `;
 
             // 点击选择

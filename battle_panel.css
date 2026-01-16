@@ -1,0 +1,134 @@
+body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    display: flex;
+    overflow: hidden;
+    font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: #f8f9fa;
+}
+
+#library-wrapper {
+    width: 320px;
+    height: 100%;
+    flex-shrink: 0;
+    border-right: 1px solid #dee2e6;
+    background: #fff;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+}
+
+#battle-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+}
+
+#battle-toolbar {
+    height: 60px;
+    background: #fff;
+    border-bottom: 1px solid #dee2e6;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    flex-shrink: 0;
+}
+
+.toolbar-group {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.point-display {
+    font-weight: bold;
+    color: #495057;
+    background: #f1f3f5;
+    padding: 5px 10px;
+    border-radius: 4px;
+}
+
+#battle-area {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    gap: 20px;
+    background-color: #e9ecef;
+    position: relative;
+    transition: background-color 0.2s;
+}
+
+#battle-area.drag-over {
+    background-color: #e7f5ff;
+    box-shadow: inset 0 0 0 2px #339af0;
+}
+
+.empty-tip {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #adb5bd;
+    font-size: 1.5rem;
+    pointer-events: none;
+    user-select: none;
+}
+
+/* 战斗面板上的卡片容器 */
+.battle-card-wrapper {
+    position: relative;
+    width: 320px; 
+    transition: transform 0.2s;
+}
+
+.battle-card-wrapper:hover {
+    transform: translateY(-2px);
+    z-index: 5;
+}
+
+.card-close-btn {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 24px;
+    height: 24px;
+    background: #ff6b6b;
+    color: white;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 22px;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    z-index: 10;
+    border: 2px solid #fff;
+    font-size: 16px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.card-close-btn:hover {
+    background: #fa5252;
+    transform: scale(1.1);
+}
+
+/* 确保模态框层级正确 */
+.modal {
+    z-index: 1000;
+}
+
+/* 输入框样式微调 */
+#pc-count {
+    padding: 5px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+}

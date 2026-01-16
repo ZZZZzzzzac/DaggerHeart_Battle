@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TRPG战斗面板</title>
+    <link rel="stylesheet" href="enemy_editor.css">
+    <link rel="stylesheet" href="enemy_card.css">
+    <link rel="stylesheet" href="enemy_library.css">
+    <link rel="stylesheet" href="battle_panel.css">
+</head>
+<body>
+
+    <!-- 左侧敌人库 -->
+    <div id="library-wrapper"></div>
+
+    <!-- 右侧战斗面板 -->
+    <div id="battle-panel">
+        <div id="battle-toolbar">
+            <div class="toolbar-group">
+                <label>PC数量: <input type="number" id="pc-count" value="4" min="1" style="width: 50px;"></label>
+                <span id="battle-budget" class="point-display" title="预算 = (3 × PC数) + 2">预算: --</span>
+                <span id="current-points" class="point-display">当前: 0</span>
+            </div>
+            <div class="toolbar-group">
+                <button id="btn-clear-battle" class="btn danger">清空面板</button>
+                <label class="btn secondary" style="margin:0; cursor:pointer;">
+                    导入面板 <input type="file" id="file-import-battle" style="display:none;" accept=".json">
+                </label>
+                <button id="btn-export-battle" class="btn secondary">导出面板</button>
+            </div>
+        </div>
+        <div id="battle-area">
+            <div class="empty-tip">从左侧拖拽敌人卡片到此处</div>
+        </div>
+    </div>
+
+    <!-- 编辑器模态框 -->
+    <div id="editor-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <div id="editor-injection-point"></div>
+        </div>
+    </div>
+
+    <!-- 脚本 -->
+    <script src="敌人数据块.js"></script>
+    <script src="enemy_card.js"></script>
+    <script src="enemy_editor_template.js"></script>
+    
+    <!-- 先注入编辑器HTML，再加载逻辑 -->
+    <script>
+        if (typeof ENEMY_EDITOR_HTML !== 'undefined') {
+            document.getElementById('editor-injection-point').innerHTML = ENEMY_EDITOR_HTML;
+        }
+    </script>
+    <script src="enemy_editor.js"></script>
+    <script src="enemy_library.js"></script>
+    <script src="battle_panel.js"></script>
+
+</body>
+</html>
