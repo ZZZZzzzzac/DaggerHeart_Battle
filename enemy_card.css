@@ -58,7 +58,6 @@
 .stat-row {
     display: flex;
     justify-content: space-between;
-    padding-bottom: 2px;
 }
 
 .stat-item {

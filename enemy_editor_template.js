@@ -1,0 +1,166 @@
+const ENEMY_EDITOR_HTML = `
+    <div class="editor-container">
+        <form id="enemyForm">
+            <!-- 基本信息 -->
+            <div class="form-section">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="name">名称</label>
+                        <input type="text" id="name" name="名称" required>
+                    </div>
+                    <div class="form-group" style="position: relative;">
+                        <label for="tier">位阶</label>
+                        <input type="text" id="tier" name="位阶" required>
+                        <select class="dropdown-trigger" onchange="this.previousElementSibling.value=this.value; this.selectedIndex=0;">
+                            <option value="" disabled selected></option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                        </select>
+                        <span class="dropdown-arrow">▼</span>
+                    </div>
+                    <div class="form-group" style="position: relative;">
+                        <label for="category">种类</label>
+                        <input type="text" id="category" name="种类">
+                        <select id="category-select" class="dropdown-trigger" onchange="this.previousElementSibling.value=this.value; this.selectedIndex=0;">
+                            <option value="" disabled selected></option>
+                            <option value="斗士">斗士</option>
+                            <option value="集群">集群</option>
+                            <option value="头目">头目</option>
+                            <option value="杂兵">杂兵</option>
+                            <option value="远程">远程</option>
+                            <option value="潜伏">潜伏</option>
+                            <option value="社交">社交</option>
+                            <option value="独狼">独狼</option>
+                            <option value="标准">标准</option>
+                            <option value="辅助">辅助</option>
+                        </select>
+                        <span class="dropdown-arrow">▼</span>
+                    </div>
+                    <div class="form-group" style="flex: 0 0 auto;">
+                        <button type="button" id="applyTemplateBtn" class="btn secondary" style="height: 100%; margin: 0; padding: 0 15px;">使用模板</button>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="intro">简介</label>
+                        <input type="text" id="intro" name="简介" placeholder="对敌人的外观和举止的概述。">
+                    </div>
+                </div>                
+                <div class="form-row">                    
+                    <div class="form-group">
+                        <label for="tactics">动机与战术</label>
+                        <input type="text" id="tactics" name="动机与战术" placeholder="例如：饥饿、觅食">
+                    </div>
+                    <div class="form-group">
+                        <label for="experiences">经历</label>
+                        <input type="text" id="experiences" name="经历" placeholder="例如：疾行+2">
+                    </div>
+                </div>
+
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="difficulty">难度</label>
+                        <input type="text" id="difficulty" name="难度">
+                    </div>
+                     <div class="form-group">
+                        <label for="hp">生命点</label>
+                        <input type="text" id="hp" name="生命点">
+                    </div>
+                    <div class="form-group">
+                        <label for="stress">压力点</label>
+                        <input type="text" id="stress" name="压力点">
+                    </div>
+                    <div class="form-group">
+                        <label for="majorThreshold">阈值</label>
+                        <input type="text" id="majorThreshold" name="重度伤害阈值" placeholder="重度">                        
+                        <input type="text" id="severeThreshold" name="严重伤害阈值" placeholder="严重">
+                    </div>
+                </div>
+
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="attackHit">攻击</label>
+                        <input type="text" id="attackHit" name="攻击命中" placeholder="命中">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" id="attackWeapon" name="攻击武器" placeholder="武器">
+                    </div>
+                    <div class="form-group" style="position: relative;">
+                        <input type="text" id="attackRange" name="攻击范围" placeholder="范围">
+                        <select class="dropdown-trigger" onchange="this.previousElementSibling.value=this.value; this.selectedIndex=0;">
+                            <option value="" disabled selected></option>
+                            <option value="近战">近战</option>
+                            <option value="邻近">邻近</option>
+                            <option value="近">近</option>
+                            <option value="远">远</option>
+                            <option value="极远">极远</option>
+                        </select>
+                        <span class="dropdown-arrow">▼</span>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" id="attackDamage" name="攻击伤害" placeholder="伤害骰">
+                    </div>
+                    <div class="form-group" style="position: relative;">
+                        <input type="text" id="attackAttr" name="攻击属性" placeholder="属性">
+                        <select class="dropdown-trigger" onchange="this.previousElementSibling.value=this.value; this.selectedIndex=0;">
+                            <option value="" disabled selected></option>
+                            <option value="物理">物理</option>
+                            <option value="魔法">魔法</option>
+                        </select>
+                        <span class="dropdown-arrow">▼</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 特性 -->
+            <div class="form-section">                
+                <div id="traitsContainer">
+                    <!-- 特性条目将在这里动态生成 -->
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="button" id="addTraitBtn" class="btn secondary">+ 添加特性</button>
+                <button type="submit" class="btn primary">确定</button>
+                <button type="button" id="clearBtn" class="btn danger">清空</button>
+            </div>
+        </form>
+    </div>
+    
+    <!-- 特性模板 -->
+    <template id="traitTemplate">
+        <div class="trait-item">
+            <div class="form-row">
+                <div class="form-group" style="position: relative;">
+                    <label>特性名称</label>
+                    <input type="text" class="trait-name" name="特性名称" placeholder="特性名称" required>
+                    <select class="dropdown-trigger trait-name-select">
+                        <option value="" disabled selected></option>
+                    </select>
+                    <span class="dropdown-arrow">▼</span>
+                </div>
+                <div class="form-group" style="position: relative;">
+                    <label>特性类型</label>
+                    <input type="text" class="trait-type" name="特性类型" placeholder="被动/动作/反应">
+                    <select class="dropdown-trigger" onchange="this.previousElementSibling.value=this.value; this.selectedIndex=0;">
+                        <option value="" disabled selected></option>
+                        <option value="被动">被动</option>
+                        <option value="动作">动作</option>
+                        <option value="反应">反应</option>
+                    </select>
+                    <span class="dropdown-arrow">▼</span>
+                </div>
+                <button type="button" class="btn-icon remove-trait" title="删除">×</button>
+            </div>
+            <div class="form-group">
+                <label>特性描述</label>
+                <textarea class="trait-desc" name="特性描述" rows="2" placeholder="特性描述"></textarea>
+            </div>
+        </div>
+    </template>
+`;
