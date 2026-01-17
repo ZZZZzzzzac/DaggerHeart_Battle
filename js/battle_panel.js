@@ -159,6 +159,32 @@ class BattlePanel {
 
                 this.modal.style.display = 'none';
             });
+
+            // 绑定另存为
+            const saveAsBtn = document.getElementById('saveAsBtn');
+            if (saveAsBtn) {
+                saveAsBtn.addEventListener('click', () => {
+                    if (typeof window.collectEnemyEditorData !== 'function') {
+                        console.error('collectEnemyEditorData function not found');
+                        return;
+                    }
+
+                    const newData = window.collectEnemyEditorData();
+
+                    // 区分是 Library 还是 Battle 编辑
+                    if (this.editContext === 'library') {
+                        // index -1 表示新建
+                        this.library.saveEnemy(newData, -1);
+                        alert('已另存为新敌人到库中');
+                    } else if (this.editContext === 'battle') {
+                        // 战斗面板新建
+                        this.addEnemy(newData);
+                        alert('已另存为新敌人到战场');
+                    }
+                    
+                    this.modal.style.display = 'none';
+                });
+            }
         }
     }
 
