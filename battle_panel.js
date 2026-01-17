@@ -35,8 +35,7 @@ class BattlePanel {
         // 我们不需要 library 的 onSelect 做什么，因为主要是拖拽
         this.library = new EnemyLibrary('library-wrapper', {
             onSelect: (enemyData) => {
-                // 可选：点击库里的项，可以高亮或者做点什么
-                console.log('Selected in library:', enemyData['名称']);
+                this.addEnemy(enemyData);
             },
             onRequestNew: () => {
                 this.openEditorForLibrary(-1);
@@ -48,6 +47,15 @@ class BattlePanel {
     }
 
     bindEvents() {
+        // Toggle Library
+        const toggleBtn = document.getElementById('toggle-library-btn');
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', () => {
+                document.body.classList.toggle('library-open');
+                toggleBtn.textContent = document.body.classList.contains('library-open') ? '◀' : '▶';
+            });
+        }
+
         // PC 数量变化
         this.pcCountInput.addEventListener('change', (e) => {
             this.pcCount = parseInt(e.target.value) || 1;
