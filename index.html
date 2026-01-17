@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TRPG战斗面板</title>
-    <link rel="stylesheet" href="enemy_editor.css">
-    <link rel="stylesheet" href="enemy_card.css">
-    <link rel="stylesheet" href="enemy_library.css">
-    <link rel="stylesheet" href="battle_panel.css">
+    <link rel="stylesheet" href="css/enemy_editor.css">
+    <link rel="stylesheet" href="css/enemy_card.css">
+    <link rel="stylesheet" href="css/enemy_library.css">
+    <link rel="stylesheet" href="css/battle_panel.css">
 </head>
 <body>
 
@@ -80,16 +80,16 @@
                 <span id="current-points" class="point-display">当前: 0</span>
             </div>
             <div class="toolbar-group">
-                <button id="btn-clear-battle" class="btn secondary danger">清空面板</button>
-                <label class="btn secondary">
-                    导入面板
+                <button id="btn-clear-battle" class="btn secondary danger" title="清空面板">清空</button>
+                <label class="btn secondary" title="导入面板">
+                    <span>导入</span>
                     <input type="file" id="file-import-battle" style="display:none;" accept=".json">
                 </label>
-                <button id="btn-export-battle" class="btn secondary">导出面板</button>
+                <button id="btn-export-battle" class="btn secondary" title="导出面板">导出</button>
             </div>
         </div>
         <div id="battle-area">
-            <div class="empty-tip">点击左侧箭头开启敌人库<br>点击或拖拽卡片到此处<br>右键卡片可以修改数据</div>            
+            <div class="empty-tip">点左侧开启敌人库<br>点击或拖拽到此处<br>右键卡片修改数据<br>手机长按修改数据</div>            
         </div>
     </div>
 
@@ -273,10 +273,10 @@
     <!-- 脚本 -->
     <script src="data/核心书.js"></script>
     <script src="data/VOID.js"></script>
-    <script src="enemy_card.js"></script>
-    <script src="enemy_editor.js"></script>
-    <script src="enemy_library.js"></script>
-    <script src="battle_panel.js"></script>
+    <script src="js/enemy_card.js"></script>
+    <script src="js/enemy_editor.js"></script>
+    <script src="js/enemy_library.js"></script>
+    <script src="js/battle_panel.js"></script>
 
 </body>
 </html>
