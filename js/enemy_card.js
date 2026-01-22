@@ -18,19 +18,38 @@ function renderEnemyCard(enemyData) {
     const maxStress = parseInt(enemyData['压力点']) || 0;
     
     // 构建 HTML 结构
+    const introHtml = enemyData['简介'] ? `<div class="card-intro">${enemyData['简介']}</div>` : '';
+    const tacticsHtml = enemyData['动机与战术'] ? `<div class="card-tactics"><strong>动机与战术：</strong>${enemyData['动机与战术']}</div>` : '';
+
     const headerHtml = `
         <div class="card-header">
             <div class="card-title">
                 <span>${enemyData['名称'] || '未命名'}</span>
                 <div class="card-meta">位阶 ${enemyData['位阶'] || '1'} ${enemyData['种类'] || '标准'} </div>
             </div>
-            
-            <div class="card-intro">${enemyData['简介'] || ''}</div>
-            <div class="card-tactics"><strong>动机与战术：</strong>${enemyData['动机与战术'] || ''}</div>
+            ${introHtml}
+            ${tacticsHtml}
         </div>
     `;
 
     // 防御部分 (合并数值与状态点)
+    const hpRowHtml = maxHp > 0 ? `
+        <div class="point-row" id="hp-row-${Date.now()}-${Math.random()}">
+            <span class="point-label">生命</span>
+            <div class="checkbox-container hp-container"></div>
+        </div>` : '';
+
+    const stressRowHtml = maxStress > 0 ? `
+        <div class="point-row" id="stress-row-${Date.now()}-${Math.random()}">
+            <span class="point-label">压力</span>
+            <div class="checkbox-container stress-container"></div>
+        </div>` : '';
+
+    const experienceHtml = enemyData['经历'] ? `
+        <div class="experience-row">
+            <strong>经历：</strong>${enemyData['经历']}
+        </div>` : '';
+
     const defenseHtml = `
         <div class="defense-section">
             <div class="stat-row">
@@ -49,24 +68,17 @@ function renderEnemyCard(enemyData) {
             </div>
             
             <div class="points-section">
-                <div class="point-row" id="hp-row-${Date.now()}-${Math.random()}">
-                    <span class="point-label">生命</span>
-                    <div class="checkbox-container hp-container"></div>
-                </div>
-                <div class="point-row" id="stress-row-${Date.now()}-${Math.random()}">
-                    <span class="point-label">压力</span>
-                    <div class="checkbox-container stress-container"></div>
-                </div>
+                ${hpRowHtml}
+                ${stressRowHtml}
             </div>
 
-            <div class="experience-row">
-                <strong>经历：</strong>${enemyData['经历'] || '-'}
-            </div>
+            ${experienceHtml}
         </div>
     `;
 
     // 攻击部分
-    const attackHtml = `
+    const hasAttack = enemyData['攻击命中'] || enemyData['攻击武器'] || enemyData['攻击范围'] || enemyData['攻击伤害'] || enemyData['攻击属性'];
+    const attackHtml = hasAttack ? `
         <div class="attack-section">
             <div class="attack-content">
                 攻击${enemyData['攻击命中'] || '-'} <span class="attack-separator">|</span>
@@ -74,7 +86,7 @@ function renderEnemyCard(enemyData) {
                 ${enemyData['攻击伤害'] || '-'} ${enemyData['攻击属性'] || '-'}
             </div>
         </div>
-    `;
+    ` : '';
 
     // 特性部分
     const traitsContainer = document.createElement('div');
@@ -113,19 +125,27 @@ function renderEnemyCard(enemyData) {
     // --- 逻辑绑定 ---
 
     // 1. 生命点 Checkbox
-    const hpContainer = card.querySelector('.hp-container');
-    renderCheckboxes(hpContainer, maxHp, enemyData._currentHp, 'filled', (newVal) => {
-        enemyData._currentHp = newVal;
-        // 可以在这里触发数据保存事件
-        dispatchUpdate(card);
-    });
+    if (maxHp > 0) {
+        const hpContainer = card.querySelector('.hp-container');
+        if (hpContainer) {
+            renderCheckboxes(hpContainer, maxHp, enemyData._currentHp, 'filled', (newVal) => {
+                enemyData._currentHp = newVal;
+                // 可以在这里触发数据保存事件
+                dispatchUpdate(card);
+            });
+        }
+    }
 
     // 2. 压力点 Checkbox
-    const stressContainer = card.querySelector('.stress-container');
-    renderCheckboxes(stressContainer, maxStress, enemyData._currentStress, 'stress-filled', (newVal) => {
-        enemyData._currentStress = newVal;
-        dispatchUpdate(card);
-    });
+    if (maxStress > 0) {
+        const stressContainer = card.querySelector('.stress-container');
+        if (stressContainer) {
+            renderCheckboxes(stressContainer, maxStress, enemyData._currentStress, 'stress-filled', (newVal) => {
+                enemyData._currentStress = newVal;
+                dispatchUpdate(card);
+            });
+        }
+    }
 
     // 3. 备注输入
     const noteInput = card.querySelector('.note-input');

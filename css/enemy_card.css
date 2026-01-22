@@ -90,6 +90,7 @@
 .points-section {
     display: flex;
     flex-direction: column;
+    gap: 5px;
 }
 
 .point-row {
@@ -101,6 +102,7 @@
 .point-label {
     font-weight: bold;
     font-size: 0.9em;
+    min-width: 35px;
 }
 
 .checkbox-container {
