@@ -19,6 +19,7 @@ class EnemyLibrary {
         this.onSelect = options.onSelect || null; // (enemyData) => {}
         this.onRequestNew = options.onRequestNew || null; // () => {}
         this.onRequestEdit = options.onRequestEdit || null; // (enemyData, index) => {}
+        this.onSyncRequest = options.onSyncRequest || null; // () => {} (请求同步/上传)
 
         this.filters = {
             search: '',
@@ -47,13 +48,15 @@ class EnemyLibrary {
         if (stored) {
             try {
                 this.enemies = JSON.parse(stored);
-                // 兼容性修复：确保所有数据都有“来源”
+                // 兼容性修复：确保所有数据都有“来源”和“id”
                 this.enemies.forEach(e => {
                     if (!e['来源']) {
                         e['来源'] = '自定义';
                     }
                     // 清理旧的 source 字段
                     if (e.source) delete e.source;
+                    // 确保有 ID
+                    if (!e.id) e.id = this.generateUUID();
                 });
             } catch (e) {
                 console.error('Failed to parse enemy library data', e);
@@ -78,8 +81,24 @@ class EnemyLibrary {
         localStorage.setItem(this.storageKey, JSON.stringify(this.enemies));
     }
 
+    // 生成 UUID
+    generateUUID() {
+        if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+            return crypto.randomUUID();
+        }
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+    }
+
     // 添加或更新敌人
     saveEnemy(enemyData, index = -1) {
+        // 确保数据有 ID
+        if (!enemyData.id) {
+            enemyData.id = this.generateUUID();
+        }
+
         if (index >= 0) {
             this.enemies[index] = enemyData;
         } else {
@@ -129,31 +148,8 @@ class EnemyLibrary {
             try {
                 const importedData = JSON.parse(event.target.result);
                 if (Array.isArray(importedData)) {
-                    let addedCount = 0;
-                    let skippedCount = 0;
-
-                    importedData.forEach(importedEnemy => {
-                        // 如果没有来源，使用文件名作为来源
-                        if (!importedEnemy['来源']) {
-                            importedEnemy['来源'] = defaultSource;
-                        }
-
-                        // 检查同名
-                        const exists = this.enemies.some(existing => existing['名称'] === importedEnemy['名称']);
-                        if (!exists) {
-                            // 清理旧 source
-                            if (importedEnemy.source) delete importedEnemy.source;
-                            this.enemies.push(importedEnemy);
-                            addedCount++;
-                        } else {
-                            skippedCount++;
-                        }
-                    });
-
-                    this.saveData();
-                    this.updateSourceFilterOptions();
-                    this.applyFilters();
-                    alert(`导入完成：成功 ${addedCount} 个，跳过同名 ${skippedCount} 个`);
+                    this.mergeData(importedData, defaultSource);
+                    alert(`导入完成`);
                 } else {
                     alert('导入文件格式错误：必须是数组');
                 }
@@ -162,6 +158,51 @@ class EnemyLibrary {
             }
         };
         reader.readAsText(file);
+    }
+
+    // 通用数据合并逻辑 (用于文件导入和云端同步)
+    mergeData(newData, defaultSource = '自定义') {
+        let addedCount = 0;
+        let updatedCount = 0;
+
+        newData.forEach(newItem => {
+            // 如果没有来源
+            if (!newItem['来源']) {
+                newItem['来源'] = defaultSource;
+            }
+            if (newItem.source) delete newItem.source;
+            
+            // 确保 newItem 有 ID
+            if (!newItem.id) newItem.id = this.generateUUID();
+
+            // 检查 ID (仅使用 ID 匹配)
+            const index = this.enemies.findIndex(existing => existing.id === newItem.id);
+
+            if (index === -1) {
+                // 新增
+                this.enemies.push(newItem);
+                addedCount++;
+            } else {
+                // 更新 (覆盖本地)
+                // 注意：这里简单的覆盖可能会覆盖用户的修改，但对于云同步来说通常期望云端是最新的
+                this.enemies[index] = newItem;
+                updatedCount++;
+            }
+        });
+
+        this.saveData(); // 保存到 localStorage
+        this.updateSourceFilterOptions();
+        this.applyFilters();
+        
+        console.log(`Merge complete: ${addedCount} added, ${updatedCount} updated.`);
+        return { added: addedCount, updated: updatedCount };
+    }
+
+    // 获取可上传的数据 (排除只读源)
+    getUploadableEnemies() {
+        return this.enemies.filter(e => {
+            return e['来源'] !== '核心书' && e['来源'] !== 'VOID';
+        });
     }
 
     setupMultiSelects() {

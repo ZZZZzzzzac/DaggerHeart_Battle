@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="css/enemy_editor.css">
     <link rel="stylesheet" href="css/enemy_card.css">
     <link rel="stylesheet" href="css/enemy_library.css">
+    <link rel="stylesheet" href="css/enemy_library_online.css">
     <link rel="stylesheet" href="css/battle_panel.css">
 </head>
 <body>
@@ -16,10 +17,22 @@
 
     <!-- 左侧敌人库 -->
     <div id="library-wrapper" class="library-container">
+        <!-- Online Controls -->
+        <div id="online-controls" class="online-controls">
+            <div class="user-badge">
+                <div id="online-status-dot" class="status-dot offline"></div>
+                <span id="online-username">离线</span>
+            </div>
+            <button id="btn-online-download" class="btn secondary btn-online" title="刷新云端数据">下载</button>
+            <button id="btn-online-upload" class="btn primary btn-online hidden" title="上传本地数据">上传</button>
+            <button id="btn-online-auth" class="btn primary btn-online">登录</button>
+        </div>
         <div class="library-header">
             <div class="library-title">
                 <span>敌人库</span>
                 <span style="font-size:0.8em;color:#666;" id="lib-count">0</span>
+                
+
                             <div class="sort-controls">
                 排序:
                 <button class="sort-btn" data-sort="位阶">位阶</button> |
@@ -90,6 +103,28 @@
         </div>
         <div id="battle-area">
             <div class="empty-tip">点左侧开启敌人库<br>点击或拖拽到此处<br>右键卡片修改数据<br>手机长按修改数据</div>            
+        </div>
+    </div>
+
+    <!-- Online Login Modal -->
+    <div id="online-login-modal" class="modal-overlay">
+        <div class="modal-content-online">
+            <h3 class="modal-title">云端账号</h3>
+            <div class="form-group-online">
+                <label>邮箱</label>
+                <input type="email" id="online-email" placeholder="email@example.com">
+            </div>
+            <div class="form-group-online">
+                <label>密码</label>
+                <input type="password" id="online-password" placeholder="******">
+            </div>
+            <div class="modal-buttons">
+                <button id="btn-do-login" class="btn primary" style="flex:1;">登录</button>
+                <button id="btn-do-signup" class="btn secondary" style="flex:1;">注册</button>
+            </div>
+            <div class="modal-buttons">
+                <button id="btn-close-online-modal" class="btn danger" style="border:none; width:100%;">关闭</button>
+            </div>
         </div>
     </div>
 
@@ -278,6 +313,10 @@
     <script src="js/enemy_editor.js"></script>
     <script src="js/enemy_library.js"></script>
     <script src="js/battle_panel.js"></script>
+    
+    <!-- Online Features -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/enemy_library_online.js"></script>
 
 </body>
 </html>
