@@ -22,9 +22,9 @@ class EnemyLibrary {
 
         this.filters = {
             search: '',
-            tier: '',
-            category: '',
-            source: '' // 这里的 source 指的是“来源”字段的值
+            tier: [],
+            category: [],
+            source: ['核心书'] // 默认只显示核心书
         };
         
         this.sort = {
@@ -164,6 +164,107 @@ class EnemyLibrary {
         reader.readAsText(file);
     }
 
+    setupMultiSelects() {
+        this.createMultiSelect('lib-filter-source', 'source', '来源');
+        this.createMultiSelect('lib-filter-tier', 'tier', '位阶');
+        this.createMultiSelect('lib-filter-category', 'category', '种类');
+    }
+
+    createMultiSelect(selectId, filterKey, labelText) {
+        const select = this.container.querySelector('#' + selectId);
+        if (!select) return;
+        
+        // Check if already created
+        if (select.nextSibling && select.nextSibling.classList && select.nextSibling.classList.contains('multi-select-container')) {
+            return;
+        }
+
+        select.style.display = 'none'; // Hide original
+        
+        const container = document.createElement('div');
+        container.className = 'multi-select-container';
+        container.dataset.targetId = selectId;
+        
+        const btn = document.createElement('div');
+        btn.className = 'multi-select-btn';
+        btn.textContent = labelText;
+        
+        const dropdown = document.createElement('div');
+        dropdown.className = 'multi-select-dropdown';
+
+        btn.onclick = (e) => {
+            // Close others
+            this.container.querySelectorAll('.multi-select-dropdown').forEach(d => {
+                if (d !== dropdown) d.classList.remove('show');
+            });
+            dropdown.classList.toggle('show');
+            e.stopPropagation();
+        };
+        
+        container.appendChild(btn);
+        container.appendChild(dropdown);
+        
+        select.parentNode.insertBefore(container, select.nextSibling); // Insert after select
+        
+        // Initial population
+        this.refreshMultiSelectUI(selectId, filterKey, labelText);
+    }
+
+    refreshMultiSelectUI(selectId, filterKey, labelText) {
+        const select = this.container.querySelector('#' + selectId);
+        const container = this.container.querySelector(`.multi-select-container[data-target-id="${selectId}"]`);
+        if (!select || !container) return;
+        
+        const dropdown = container.querySelector('.multi-select-dropdown');
+        const btn = container.querySelector('.multi-select-btn');
+        
+        dropdown.innerHTML = '';
+        
+        // Get options from original select
+        Array.from(select.options).forEach(opt => {
+            if (opt.value === "") return; // Skip "All" placeholder
+            
+            const optionDiv = document.createElement('label');
+            optionDiv.className = 'multi-select-option';
+            
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.value = opt.value;
+            // Check if currently selected in filters
+            if (this.filters[filterKey].includes(opt.value)) {
+                checkbox.checked = true;
+            }
+            
+            checkbox.addEventListener('change', () => {
+                const val = checkbox.value;
+                if (checkbox.checked) {
+                    if (!this.filters[filterKey].includes(val)) {
+                        this.filters[filterKey].push(val);
+                    }
+                } else {
+                    this.filters[filterKey] = this.filters[filterKey].filter(v => v !== val);
+                }
+                this.updateMultiSelectBtnText(btn, this.filters[filterKey], labelText);
+                this.applyFilters();
+            });
+            
+            optionDiv.appendChild(checkbox);
+            optionDiv.appendChild(document.createTextNode(opt.text));
+            dropdown.appendChild(optionDiv);
+        });
+        
+        // Update button text
+        this.updateMultiSelectBtnText(btn, this.filters[filterKey], labelText);
+    }
+    
+    updateMultiSelectBtnText(btn, selectedValues, labelText) {
+        if (selectedValues.length === 0) {
+            btn.textContent = labelText;
+        } else {
+            btn.textContent = `${labelText} (${selectedValues.length})`;
+        }
+    }
+
     renderUI() {
         this.bindEvents();
     }
@@ -171,22 +272,24 @@ class EnemyLibrary {
     bindEvents() {
         // 筛选事件
         const searchInput = this.container.querySelector('#lib-search');
-        const sourceSelect = this.container.querySelector('#lib-filter-source');
-        const tierSelect = this.container.querySelector('#lib-filter-tier');
-        const catSelect = this.container.querySelector('#lib-filter-category');
-
+        
         const handleFilter = () => {
             this.filters.search = searchInput.value.toLowerCase();
-            this.filters.source = sourceSelect.value;
-            this.filters.tier = tierSelect.value;
-            this.filters.category = catSelect.value;
             this.applyFilters();
         };
 
         searchInput.addEventListener('input', handleFilter);
-        sourceSelect.addEventListener('change', handleFilter);
-        tierSelect.addEventListener('change', handleFilter);
-        catSelect.addEventListener('change', handleFilter);
+        
+        // 初始化多选下拉框
+        this.setupMultiSelects();
+
+        // 点击外部关闭多选下拉框
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.multi-select-container')) {
+                const dropdowns = this.container.querySelectorAll('.multi-select-dropdown');
+                if(dropdowns) dropdowns.forEach(d => d.classList.remove('show'));
+            }
+        });
 
         // 排序事件
         this.container.querySelectorAll('.sort-btn').forEach(btn => {
@@ -228,14 +331,17 @@ class EnemyLibrary {
         const sourceSelect = this.container.querySelector('#lib-filter-source');
         if (!sourceSelect) return;
 
-        const currentVal = sourceSelect.value;
-        const sources = new Set();
+        // 保存原有的 source 列表以便比对，或者直接重建
+        // 这里的逻辑有点复杂，因为 filters.source 也是数组了。
+        // 我们只需重建 select 的 options，然后刷新 multi-select UI 即可。
+        // filters.source 中的值如果不再存在于新的 sources 中，应该被移除吗？
+        // 暂时不强制移除，因为用户可能正在导入数据。
         
+        const sources = new Set();
         this.enemies.forEach(e => {
             if (e['来源']) sources.add(e['来源']);
         });
         
-        // 保留 "所有来源" 选项
         sourceSelect.innerHTML = '<option value="">所有来源</option>';
         
         Array.from(sources).sort().forEach(src => {
@@ -244,15 +350,9 @@ class EnemyLibrary {
             option.textContent = src;
             sourceSelect.appendChild(option);
         });
-        
-        // 尝试恢复之前的选择，如果该选项已不存在（比如删除了唯一的该来源敌人），则 value 为空，变为“所有来源”
-        sourceSelect.value = currentVal;
-        // 如果恢复失败（currentVal 不再有效），则 filters 也应该重置吗？
-        // 如果 currentVal 不为空但下拉框里没有了，sourceSelect.value 会变成 ""。
-        // 这时应该更新 filters。
-        if (sourceSelect.value !== currentVal) {
-            this.filters.source = "";
-        }
+
+        // 刷新多选 UI
+        this.refreshMultiSelectUI('lib-filter-source', 'source', '来源');
     }
 
     applyFilters() {
@@ -260,11 +360,11 @@ class EnemyLibrary {
             // 搜索
             if (this.filters.search && !enemy['名称'].toLowerCase().includes(this.filters.search)) return false;
             // 来源
-            if (this.filters.source && enemy['来源'] !== this.filters.source) return false;
+            if (this.filters.source.length > 0 && !this.filters.source.includes(enemy['来源'])) return false;
             // 位阶
-            if (this.filters.tier && String(enemy['位阶']) !== this.filters.tier) return false;
+            if (this.filters.tier.length > 0 && !this.filters.tier.includes(String(enemy['位阶']))) return false;
             // 种类
-            if (this.filters.category && enemy['种类'] !== this.filters.category) return false;
+            if (this.filters.category.length > 0 && !this.filters.category.includes(enemy['种类'])) return false;
             return true;
         });
 
