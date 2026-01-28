@@ -202,10 +202,19 @@ class OnlineEnemyLibrary {
         if (!confirm('确定要将当前的本地自定义数据同步到云端吗？\n这将覆盖云端已有的同名数据。')) return;
 
         // 获取可上传数据
-        const enemiesToUpload = this.library.getUploadableEnemies();
+        const candidates = this.library.getUploadableEnemies();
+
+        // 过滤掉属于其他用户的云端数据 (防止 403 错误)
+        const enemiesToUpload = candidates.filter(e => {
+            // 如果有 user_id (说明来自云端) 且不是当前用户，则不上传
+            if (e.user_id && e.user_id !== this.user.id) {
+                return false;
+            }
+            return true;
+        });
         
         if (enemiesToUpload.length === 0) {
-            alert('没有可上传的自定义数据 (核心书/VOID 数据不上传)');
+            alert('没有可上传的自定义数据 (别人的数据或官方数据不会被上传)');
             return;
         }
 
