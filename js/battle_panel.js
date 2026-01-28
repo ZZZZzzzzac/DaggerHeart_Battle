@@ -131,11 +131,6 @@ class BattlePanel {
         this.closeModal.addEventListener('click', () => {
             this.modal.style.display = 'none';
         });
-        window.addEventListener('click', (event) => {
-            if (event.target == this.modal) {
-                this.modal.style.display = "none";
-            }
-        });
 
         // 绑定表单提交
         if (this.enemyForm) {
