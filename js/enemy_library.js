@@ -39,7 +39,6 @@ class EnemyLibrary {
     init() {
         this.loadData();
         this.renderUI();
-        this.updateSourceFilterOptions();
         this.applyFilters();
     }
 
@@ -105,7 +104,6 @@ class EnemyLibrary {
             this.enemies.push(enemyData);
         }
         this.saveData();
-        this.updateSourceFilterOptions();
         this.applyFilters(); // 重新渲染
     }
 
@@ -129,7 +127,6 @@ class EnemyLibrary {
 
         this.enemies.splice(index, 1);
         this.saveData();
-        this.updateSourceFilterOptions();
         this.applyFilters();
     }
 
@@ -206,7 +203,6 @@ class EnemyLibrary {
         });
 
         this.saveData(); // 保存到 localStorage
-        this.updateSourceFilterOptions();
         this.applyFilters();
         
         console.log(`Merge complete: ${addedCount} added, ${updatedCount} updated.`);
@@ -382,33 +378,98 @@ class EnemyLibrary {
         });
     }
 
-    // 更新来源筛选下拉框
+    // 获取经过部分筛选的敌人列表 (用于计算某一筛选项的可选值)
+    getEnemiesFilteredBy(excludeKey) {
+        return this.enemies.filter(enemy => {
+            // 搜索
+            if (this.filters.search && !enemy['名称'].toLowerCase().includes(this.filters.search)) return false;
+            // 来源 (如果不是正在计算来源)
+            if (excludeKey !== 'source' && this.filters.source.length > 0 && !this.filters.source.includes(enemy['来源'])) return false;
+            // 位阶 (如果不是正在计算位阶)
+            if (excludeKey !== 'tier' && this.filters.tier.length > 0 && !this.filters.tier.includes(String(enemy['位阶']))) return false;
+            // 种类 (如果不是正在计算种类)
+            if (excludeKey !== 'category' && this.filters.category.length > 0 && !this.filters.category.includes(enemy['种类'])) return false;
+            return true;
+        });
+    }
+
+    // 更新筛选下拉框 (来源、位阶、种类)
     updateSourceFilterOptions() {
+        // 1. 更新来源
         const sourceSelect = this.container.querySelector('#lib-filter-source');
-        if (!sourceSelect) return;
+        if (sourceSelect) {
+            const filtered = this.getEnemiesFilteredBy('source');
+            const sources = new Set();
+            filtered.forEach(e => {
+                if (e['来源']) sources.add(e['来源']);
+            });
+            
+            // 清理已失效的筛选选项
+            this.filters.source = this.filters.source.filter(val => sources.has(val));
 
-        // 保存原有的 source 列表以便比对，或者直接重建
-        // 这里的逻辑有点复杂，因为 filters.source 也是数组了。
-        // 我们只需重建 select 的 options，然后刷新 multi-select UI 即可。
-        // filters.source 中的值如果不再存在于新的 sources 中，应该被移除吗？
-        // 暂时不强制移除，因为用户可能正在导入数据。
-        
-        const sources = new Set();
-        this.enemies.forEach(e => {
-            if (e['来源']) sources.add(e['来源']);
-        });
-        
-        sourceSelect.innerHTML = '<option value="">所有来源</option>';
-        
-        Array.from(sources).sort().forEach(src => {
-            const option = document.createElement('option');
-            option.value = src;
-            option.textContent = src;
-            sourceSelect.appendChild(option);
-        });
+            sourceSelect.innerHTML = '<option value="">所有来源</option>';
+            
+            Array.from(sources).sort().forEach(src => {
+                const option = document.createElement('option');
+                option.value = src;
+                option.textContent = src;
+                sourceSelect.appendChild(option);
+            });
+    
+            // 刷新多选 UI
+            this.refreshMultiSelectUI('lib-filter-source', 'source', '来源');
+        }
 
-        // 刷新多选 UI
-        this.refreshMultiSelectUI('lib-filter-source', 'source', '来源');
+        // 2. 更新位阶
+        const tierSelect = this.container.querySelector('#lib-filter-tier');
+        if (tierSelect) {
+            const filtered = this.getEnemiesFilteredBy('tier');
+            const tiers = new Set();
+            filtered.forEach(e => {
+                if (e['位阶'] !== undefined && e['位阶'] !== null) tiers.add(String(e['位阶']));
+            });
+            
+            // 清理已失效的筛选选项
+            this.filters.tier = this.filters.tier.filter(val => tiers.has(val));
+
+            tierSelect.innerHTML = '<option value="">所有位阶</option>';
+            
+            // 按数值排序
+            Array.from(tiers).sort((a, b) => parseInt(a) - parseInt(b)).forEach(t => {
+                const option = document.createElement('option');
+                option.value = t;
+                option.textContent = t;
+                tierSelect.appendChild(option);
+            });
+    
+            // 刷新多选 UI
+            this.refreshMultiSelectUI('lib-filter-tier', 'tier', '位阶');
+        }
+
+        // 3. 更新种类
+        const categorySelect = this.container.querySelector('#lib-filter-category');
+        if (categorySelect) {
+            const filtered = this.getEnemiesFilteredBy('category');
+            const categories = new Set();
+            filtered.forEach(e => {
+                if (e['种类']) categories.add(e['种类']);
+            });
+            
+            // 清理已失效的筛选选项
+            this.filters.category = this.filters.category.filter(val => categories.has(val));
+
+            categorySelect.innerHTML = '<option value="">所有种类</option>';
+            
+            Array.from(categories).sort().forEach(c => {
+                const option = document.createElement('option');
+                option.value = c;
+                option.textContent = c;
+                categorySelect.appendChild(option);
+            });
+    
+            // 刷新多选 UI
+            this.refreshMultiSelectUI('lib-filter-category', 'category', '种类');
+        }
     }
 
     applyFilters() {
@@ -442,6 +503,7 @@ class EnemyLibrary {
 
         this.filteredEnemies = result;
         this.renderList();
+        this.updateSourceFilterOptions();
     }
 
     renderList() {
