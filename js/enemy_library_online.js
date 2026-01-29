@@ -12,10 +12,12 @@ const SUPABASE_ANON_KEY = 'sb_publishable_smqqs8pIJiCrEJErff4maQ_Nvt9g0YL';
 // ==========================================
 
 class OnlineEnemyLibrary {
-    constructor(libraryInstance) {
+    constructor(libraryInstance, envLibraryInstance) {
         this.library = libraryInstance;
+        this.envLibrary = envLibraryInstance;
         this.client = null;
         this.user = null;
+        this.currentUserId = undefined;
         
         this.init();
     }
@@ -43,6 +45,14 @@ class OnlineEnemyLibrary {
     }
 
     handleSession(session) {
+        const newUserId = session?.user?.id || null;
+        
+        // 如果用户状态没有变化，则跳过
+        if (newUserId === this.currentUserId) {
+            return;
+        }
+        
+        this.currentUserId = newUserId;
         this.user = session ? session.user : null;
         this.updateUIState();
         
@@ -165,29 +175,43 @@ class OnlineEnemyLibrary {
     // 拉取云端数据
     async fetchFromCloud(silent = false) {
         console.log('Fetching cloud data...');
-        // 假设表名为 'shared_enemies'，字段 data 存储完整 JSON
-        const { data, error } = await this.client
-            .from('shared_enemies')
-            .select('*'); // 获取所有字段，包括 ID 和 data
+        
+        const { data: cloudItems, error } = await this.client
+            .from('shared_enemies') // 统一从 shared_enemies 表拉取
+            .select('*');
 
         if (error) {
-            console.error('Error fetching enemies:', error);
+            console.error('Error fetching cloud data:', error);
             if (!silent) alert('同步失败: ' + error.message);
             return;
         }
 
-        if (data && data.length > 0) {
-            // 将数据库里的 data 字段解包，并带上数据库 ID (用于后续更新)
-            const enemies = data.map(row => {
-                const enemy = row.data; // data 字段是 JSON
-                enemy.db_id = row.id;   // 记录数据库主键
-                enemy.user_id = row.author_id; // 记录作者
-                return enemy;
+        if (cloudItems && cloudItems.length > 0) {
+            const enemies = [];
+            const environments = [];
+
+            cloudItems.forEach(row => {
+                const item = row.data;
+                item.db_id = row.id;
+                item.user_id = row.author_id;
+
+                if (item['类型'] === '环境') {
+                    environments.push(item);
+                } else {
+                    enemies.push(item);
+                }
             });
 
-            // 调用主库的合并逻辑
-            const result = this.library.mergeData(enemies, '云端');
-            const msg = `云端数据同步完成：新增 ${result.added} 条，更新 ${result.updated} 条`;
+            // 1. Merge Enemies
+            const resultEnemies = this.library.mergeData(enemies, '云端');
+            
+            // 2. Merge Environments
+            let resultEnv = { added: 0, updated: 0 };
+            if (this.envLibrary && environments.length > 0) {
+                resultEnv = this.envLibrary.mergeData(environments, '云端');
+            }
+
+            const msg = `云端同步完成：敌人 (+${resultEnemies.added}/^${resultEnemies.updated})，环境 (+${resultEnv.added}/^${resultEnv.updated})`;
             console.log(msg);
             if (!silent) alert(msg);
         } else {
@@ -217,68 +241,78 @@ class OnlineEnemyLibrary {
 
         if (!confirm('确定要将当前的本地自定义数据同步到云端吗？\n这将覆盖云端已有的同名数据。')) return;
 
-        // 获取可上传数据
-        const candidates = this.library.getUploadableEnemies();
+        // 1. Gather all uploadable items
+        const enemiesToUpload = this.getUploadableItems(this.library);
+        let environmentsToUpload = [];
+        if (this.envLibrary) {
+            environmentsToUpload = this.getUploadableItems(this.envLibrary);
+        }
 
-        // 过滤掉属于其他用户的云端数据 (防止 403 错误)
-        const enemiesToUpload = candidates.filter(e => {
-            // 如果有 user_id (说明来自云端) 且不是当前用户，则不上传
-            if (e.user_id && e.user_id !== this.user.id) {
-                return false;
-            }
-            return true;
-        });
-        
-        if (enemiesToUpload.length === 0) {
+        const allItems = [...enemiesToUpload, ...environmentsToUpload];
+
+        if (allItems.length === 0) {
             alert('没有可上传的自定义数据 (别人的数据或官方数据不会被上传)');
             return;
         }
 
-        // 准备 Payload
-        const payload = enemiesToUpload.map(e => {
-            // 优先使用云端 ID (db_id)，其次使用本地 JSON 中的 ID (id)，如果都没有则自动生成
+        // 2. Prepare Payload
+        const payload = allItems.map(e => {
             let targetId = e.db_id || e.id;
             
             if (!targetId) {
-                // 复用 enemy_library.js 中的 UUID 生成逻辑
+                // 如果没有 ID，生成一个。注意：这会修改本地对象
                 targetId = this.library.generateUUID ? this.library.generateUUID() : crypto.randomUUID();
-                // 反写回本地对象，这样下次 sync 就不会重复创建
                 e.id = targetId;
             }
 
             return {
                 id: targetId,
                 name: e['名称'],
-                data: e, // data 字段会包含更新后的 e (含 id)
-                // author_id 通常由 RLS 默认值 auth.uid() 填充，或者手动填
+                data: e,
                 author_id: this.user.id
             };
         });
 
-        // Upsert
+        // 3. Upsert to single table
         const { data, error } = await this.client
             .from('shared_enemies')
-            .upsert(payload, { onConflict: 'id' }) // 如果有 id 冲突则更新
+            .upsert(payload, { onConflict: 'id' })
             .select();
 
         if (error) {
             console.error('Upload failed:', error);
             alert('上传失败: ' + error.message);
         } else {
-            alert(`成功上传 ${data.length} 个敌人数据！`);
+            alert(`成功上传 ${data.length} 条数据！`);
             // 重新拉取以更新本地的 db_id
             this.fetchFromCloud(true);
         }
+    }
+
+    getUploadableItems(libInstance) {
+        // EnvironmentLibrary 继承自 EnemyLibrary，也有 getUploadableEnemies 方法
+        const candidates = libInstance.getUploadableEnemies();
+        return candidates.filter(e => {
+            // 如果有 user_id (说明来自云端) 且不是当前用户，则不上传
+            if (e.user_id && e.user_id !== this.user.id) {
+                return false;
+            }
+            return true;
+        });
     }
 }
 
 // 自动初始化
 window.addEventListener('load', () => { // 使用 load 确保所有脚本执行完毕
     const checkApp = setInterval(() => {
+        // 检查两个库是否都已就绪
         if (window.battleApp && window.battleApp.library) {
             clearInterval(checkApp);
-            console.log('Found BattleApp Library, initializing Online Mode...');
-            window.onlineLibrary = new OnlineEnemyLibrary(window.battleApp.library);
+            console.log('Found BattleApp Libraries, initializing Online Mode...');
+            window.onlineLibrary = new OnlineEnemyLibrary(
+                window.battleApp.library, 
+                window.battleApp.envLibrary // 传入环境库实例 (可能为 undefined 如果 battleApp 初始化方式不同，但 BattlePanel 构造函数里初始化了)
+            );
         }
     }, 100);
     

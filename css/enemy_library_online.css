@@ -71,8 +71,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    margin-left: 10px; /* Space from title */
-    margin-right: auto; 
+    margin: 0;
 }
 
 .user-badge {
@@ -80,11 +79,11 @@
     align-items: center;
     gap: 8px;
     font-size: 0.8rem;
-    color: #bbb;
-    background: #2a2a2a;
+    color: #495057;
+    background: #f1f3f5;
     padding: 4px 10px;
     border-radius: 20px;
-    border: 1px solid #444;
+    border: 1px solid #ced4da;
 }
 
 .status-dot {

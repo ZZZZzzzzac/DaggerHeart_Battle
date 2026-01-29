@@ -218,6 +218,20 @@
     display: block;
 }
 
+.trait-card .trait-question {
+    display: none;
+    margin-top: 4px;
+    font-size: 0.85em;
+    color: #666;
+    font-style: italic;
+    border-top: 1px dotted #eee;
+    padding-top: 4px;
+}
+
+.trait-card.expanded .trait-question {
+    display: block;
+}
+
 .note-section {
     margin-top: auto;
 }

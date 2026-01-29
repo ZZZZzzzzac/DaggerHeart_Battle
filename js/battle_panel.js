@@ -17,8 +17,11 @@ class BattlePanel {
         
         // Editor Elements
         this.modal = document.getElementById('editor-modal');
-        this.closeModal = document.querySelector('.close-modal');
+        this.envModal = document.getElementById('environment-editor-modal');
+        
+        this.closeButtons = document.querySelectorAll('.close-modal');
         this.enemyForm = document.getElementById('enemyForm');
+        this.envForm = document.getElementById('environmentForm');
         
         this.editingId = null; // 当前正在编辑的卡片 ID
 
@@ -31,8 +34,7 @@ class BattlePanel {
         this.render();
         this.updatePoints();
 
-        // 初始化左侧敌人库 (复用 EnemyLibrary 类)
-        // 我们不需要 library 的 onSelect 做什么，因为主要是拖拽
+        // 初始化左侧敌人库
         this.library = new EnemyLibrary('library-wrapper', {
             onSelect: (enemyData) => {
                 this.addEnemy(enemyData);
@@ -44,15 +46,37 @@ class BattlePanel {
                 this.openEditorForLibrary(index, enemyData);
             }
         });
+
+        // 初始化右侧环境库
+        this.envLibrary = new EnvironmentLibrary('env-library-wrapper', {
+            onSelect: (envData) => {
+                this.addEnemy(envData);
+            },
+            onRequestNew: () => {
+                this.openEditorForEnvLibrary(-1);
+            },
+            onRequestEdit: (envData, index) => {
+                this.openEditorForEnvLibrary(index, envData);
+            }
+        });
     }
 
     bindEvents() {
-        // Toggle Library
+        // Toggle Enemy Library (Left)
         const toggleBtn = document.getElementById('toggle-library-btn');
         if (toggleBtn) {
             toggleBtn.addEventListener('click', () => {
                 document.body.classList.toggle('library-open');
                 toggleBtn.textContent = document.body.classList.contains('library-open') ? '◀' : '▶';
+            });
+        }
+
+        // Toggle Env Library (Right)
+        const toggleEnvBtn = document.getElementById('toggle-env-library-btn');
+        if (toggleEnvBtn) {
+            toggleEnvBtn.addEventListener('click', () => {
+                document.body.classList.toggle('env-library-open');
+                toggleEnvBtn.textContent = document.body.classList.contains('env-library-open') ? '▶' : '◀';
             });
         }
 
@@ -127,57 +151,78 @@ class BattlePanel {
             }
         });
 
-        // 模态框关闭
-        this.closeModal.addEventListener('click', () => {
-            this.modal.style.display = 'none';
+        // 模态框关闭 (所有关闭按钮)
+        this.closeButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                this.modal.style.display = 'none';
+                if(this.envModal) this.envModal.style.display = 'none';
+            });
         });
 
-        // 绑定表单提交
+        // --- 敌人表单提交 ---
         if (this.enemyForm) {
             this.enemyForm.addEventListener('submit', (e) => {
-                // 防止默认提交（如果 enemy_editor.js 没有绑定的话）
                 e.preventDefault();
-                
-                if (typeof window.collectEnemyEditorData !== 'function') {
-                    console.error('collectEnemyEditorData function not found');
-                    return;
-                }
+                if (typeof window.collectEnemyEditorData !== 'function') return;
 
                 const newData = window.collectEnemyEditorData();
 
-                // 区分是 Library 还是 Battle 编辑
                 if (this.editContext === 'library') {
                     this.library.saveEnemy(newData, this.editIndex);
                 } else if (this.editContext === 'battle') {
                     this.updateEnemyInBattle(this.editId, newData);
                 }
-
                 this.modal.style.display = 'none';
             });
 
-            // 绑定另存为
             const saveAsBtn = document.getElementById('saveAsBtn');
             if (saveAsBtn) {
                 saveAsBtn.addEventListener('click', () => {
-                    if (typeof window.collectEnemyEditorData !== 'function') {
-                        console.error('collectEnemyEditorData function not found');
-                        return;
-                    }
-
+                    if (typeof window.collectEnemyEditorData !== 'function') return;
                     const newData = window.collectEnemyEditorData();
-
-                    // 区分是 Library 还是 Battle 编辑
+                    
                     if (this.editContext === 'library') {
-                        // index -1 表示新建
                         this.library.saveEnemy(newData, -1);
                         alert('已另存为新敌人到库中');
                     } else if (this.editContext === 'battle') {
-                        // 战斗面板新建
                         this.addEnemy(newData);
                         alert('已另存为新敌人到战场');
                     }
-                    
                     this.modal.style.display = 'none';
+                });
+            }
+        }
+
+        // --- 环境表单提交 ---
+        if (this.envForm) {
+            this.envForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                if (typeof window.collectEnvironmentEditorData !== 'function') return;
+
+                const newData = window.collectEnvironmentEditorData();
+
+                if (this.editContext === 'envLibrary') {
+                    this.envLibrary.saveEnemy(newData, this.editIndex);
+                } else if (this.editContext === 'battle') {
+                    this.updateEnemyInBattle(this.editId, newData);
+                }
+                this.envModal.style.display = 'none';
+            });
+
+            const envSaveAsBtn = document.getElementById('envSaveAsBtn');
+            if (envSaveAsBtn) {
+                envSaveAsBtn.addEventListener('click', () => {
+                    if (typeof window.collectEnvironmentEditorData !== 'function') return;
+                    const newData = window.collectEnvironmentEditorData();
+                    
+                    if (this.editContext === 'envLibrary') {
+                        this.envLibrary.saveEnemy(newData, -1);
+                         alert('已另存为新环境到库中');
+                    } else if (this.editContext === 'battle') {
+                        this.addEnemy(newData);
+                        alert('已另存为新环境到战场');
+                    }
+                    this.envModal.style.display = 'none';
                 });
             }
         }
@@ -258,7 +303,18 @@ class BattlePanel {
             wrapper.className = 'battle-card-wrapper';
             
             // 渲染卡片
-            const card = renderEnemyCard(instance.data);
+            let card;
+            if (instance.data['类型'] === '环境') {
+                if (typeof renderEnvironmentCard === 'function') {
+                    card = renderEnvironmentCard(instance.data);
+                } else {
+                    card = document.createElement('div');
+                    card.textContent = '环境卡渲染函数未找到';
+                }
+            } else {
+                card = renderEnemyCard(instance.data);
+            }
+            
             wrapper.appendChild(card);
 
             // 添加删除按钮
@@ -284,6 +340,9 @@ class BattlePanel {
         let minionCount = 0;
 
         this.enemies.forEach(inst => {
+            // 仅计算敌人的点数
+            if (inst.data['类型'] === '环境') return;
+
             const cat = (inst.data['种类'] || '').trim();
             if (cat === '杂兵') {
                 minionCount++;
@@ -332,11 +391,28 @@ class BattlePanel {
         this.modal.style.display = 'block';
     }
 
+    openEditorForEnvLibrary(index, data = {}) {
+        this.editContext = 'envLibrary';
+        this.editIndex = index;
+        if (index === -1) {
+            resetEnvironmentEditor();
+        } else {
+            fillEnvironmentEditor(data);
+        }
+        this.envModal.style.display = 'block';
+    }
+
     openEditorForBattle(id, data) {
         this.editContext = 'battle';
         this.editId = id;
-        fillEditor(data);
-        this.modal.style.display = 'block';
+        
+        if (data['类型'] === '环境') {
+            fillEnvironmentEditor(data);
+            this.envModal.style.display = 'block';
+        } else {
+            fillEditor(data);
+            this.modal.style.display = 'block';
+        }
     }
 
     // --- 导入导出 ---
@@ -431,7 +507,53 @@ function resetEditor() {
     document.getElementById('enemyForm').reset();
     document.getElementById('traitsContainer').innerHTML = '';
     const addTraitBtn = document.getElementById('addTraitBtn');
-    if(addTraitBtn) addTraitBtn.click(); 
+    if(addTraitBtn) addTraitBtn.click();
+}
+
+function fillEnvironmentEditor(data) {
+    const setValue = (id, val) => {
+        const el = document.getElementById(id);
+        if (el) el.value = val || '';
+    };
+
+    setValue('env-name', data['名称']);
+    setValue('env-tier', data['位阶']);
+    setValue('env-category-select', data['种类']); // Select
+    setValue('env-category', data['种类']); // Input
+    setValue('env-source', data['来源']);
+    setValue('env-intro', data['简介']);
+    setValue('env-tendency', data['趋向']);
+    setValue('env-potential-enemies', data['潜在敌人']);
+    setValue('env-difficulty', data['难度']);
+
+    const traitsContainer = document.getElementById('envTraitsContainer');
+    const addTraitBtn = document.getElementById('addEnvTraitBtn');
+    if (traitsContainer) traitsContainer.innerHTML = '';
+    
+    if (data['特性'] && addTraitBtn) {
+        data['特性'].forEach(trait => {
+            addTraitBtn.click();
+            const items = traitsContainer.querySelectorAll('.trait-item');
+            const newItem = items[items.length - 1];
+            if (newItem) {
+                newItem.querySelector('.trait-name').value = trait['名称'] || '';
+                newItem.querySelector('.trait-type').value = trait['类型'] || '';
+                newItem.querySelector('.trait-desc').value = trait['特性描述'] || '';
+                if(newItem.querySelector('.trait-question')) {
+                    newItem.querySelector('.trait-question').value = trait['特性问题'] || '';
+                }
+            }
+        });
+    }
+}
+
+function resetEnvironmentEditor() {
+    const form = document.getElementById('environmentForm');
+    if(form) form.reset();
+    const container = document.getElementById('envTraitsContainer');
+    if(container) container.innerHTML = '';
+    const addTraitBtn = document.getElementById('addEnvTraitBtn');
+    if(addTraitBtn) addTraitBtn.click();
 }
 
 // 启动应用

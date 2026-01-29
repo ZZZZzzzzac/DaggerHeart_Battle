@@ -11,21 +11,24 @@ class EnemyLibrary {
             return;
         }
         
-        this.storageKey = 'trpg_enemy_library';
-        this.enemies = [];
+        this.idPrefix = options.idPrefix || 'lib'; // ID 前缀，默认为 'lib'
+        this.storageKey = options.storageKey || 'trpg_enemy_library'; // 存储键名
+        this.supportedType = options.supportedType || '敌人'; // 支持的数据类型
+
+        this.enemies = []; // 数据列表 (在子类中可能存放环境数据)
         this.filteredEnemies = [];
         
         // 回调函数
-        this.onSelect = options.onSelect || null; // (enemyData) => {}
+        this.onSelect = options.onSelect || null; // (data) => {}
         this.onRequestNew = options.onRequestNew || null; // () => {}
-        this.onRequestEdit = options.onRequestEdit || null; // (enemyData, index) => {}
+        this.onRequestEdit = options.onRequestEdit || null; // (data, index) => {}
         this.onSyncRequest = options.onSyncRequest || null; // () => {} (请求同步/上传)
 
         this.filters = {
             search: '',
             tier: [],
             category: [],
-            source: ['核心书'] // 默认只显示核心书
+            source: options.defaultSources || ['核心书'] // 默认显示来源
         };
         
         this.sort = {
@@ -93,6 +96,17 @@ class EnemyLibrary {
 
     // 添加或更新敌人
     saveEnemy(enemyData, index = -1) {
+        // 类型检查与修正
+        if (enemyData['类型'] && enemyData['类型'] !== this.supportedType) {
+            console.warn(`Type mismatch: expected ${this.supportedType}, got ${enemyData['类型']}`);
+            // 可以在这里拒绝，或者强制修改类型，或者忽略
+            // 根据用户要求，应该检查。为了防止混淆，如果不匹配则不保存或提示。
+            // 但考虑到新建时可能没有类型，我们这里强制设为支持的类型
+            enemyData['类型'] = this.supportedType;
+        } else if (!enemyData['类型']) {
+            enemyData['类型'] = this.supportedType;
+        }
+
         // 确保数据有 ID
         if (!enemyData.id) {
             enemyData.id = this.generateUUID();
@@ -176,8 +190,19 @@ class EnemyLibrary {
     mergeData(newData, defaultSource = '自定义') {
         let addedCount = 0;
         let updatedCount = 0;
+        let skippedCount = 0;
 
         newData.forEach(newItem => {
+            // 类型检查
+            // 如果数据没有类型，默认为 '敌人' (兼容旧数据)
+            const itemType = newItem['类型'] || '敌人';
+            if (itemType !== this.supportedType) {
+                skippedCount++;
+                return; // 跳过不匹配的类型
+            }
+            // 确保类型字段存在
+            newItem['类型'] = this.supportedType;
+
             // 如果没有来源
             if (!newItem['来源']) {
                 newItem['来源'] = defaultSource;
@@ -196,7 +221,6 @@ class EnemyLibrary {
                 addedCount++;
             } else {
                 // 更新 (覆盖本地)
-                // 注意：这里简单的覆盖可能会覆盖用户的修改，但对于云同步来说通常期望云端是最新的
                 this.enemies[index] = newItem;
                 updatedCount++;
             }
@@ -205,8 +229,11 @@ class EnemyLibrary {
         this.saveData(); // 保存到 localStorage
         this.applyFilters();
         
-        console.log(`Merge complete: ${addedCount} added, ${updatedCount} updated.`);
-        return { added: addedCount, updated: updatedCount };
+        console.log(`Merge complete: ${addedCount} added, ${updatedCount} updated, ${skippedCount} skipped.`);
+        if (skippedCount > 0) {
+            alert(`已导入 ${addedCount + updatedCount} 条数据，跳过 ${skippedCount} 条类型不匹配的数据。`);
+        }
+        return { added: addedCount, updated: updatedCount, skipped: skippedCount };
     }
 
     // 获取可上传的数据 (排除只读源)
@@ -217,9 +244,9 @@ class EnemyLibrary {
     }
 
     setupMultiSelects() {
-        this.createMultiSelect('lib-filter-source', 'source', '来源');
-        this.createMultiSelect('lib-filter-tier', 'tier', '位阶');
-        this.createMultiSelect('lib-filter-category', 'category', '种类');
+        this.createMultiSelect(`${this.idPrefix}-filter-source`, 'source', '来源');
+        this.createMultiSelect(`${this.idPrefix}-filter-tier`, 'tier', '位阶');
+        this.createMultiSelect(`${this.idPrefix}-filter-category`, 'category', '种类');
     }
 
     createMultiSelect(selectId, filterKey, labelText) {
@@ -323,14 +350,15 @@ class EnemyLibrary {
 
     bindEvents() {
         // 筛选事件
-        const searchInput = this.container.querySelector('#lib-search');
+        const searchInput = this.container.querySelector(`#${this.idPrefix}-search`);
         
-        const handleFilter = () => {
-            this.filters.search = searchInput.value.toLowerCase();
-            this.applyFilters();
-        };
-
-        searchInput.addEventListener('input', handleFilter);
+        if (searchInput) {
+            const handleFilter = () => {
+                this.filters.search = searchInput.value.toLowerCase();
+                this.applyFilters();
+            };
+            searchInput.addEventListener('input', handleFilter);
+        }
         
         // 初始化多选下拉框
         this.setupMultiSelects();
@@ -358,19 +386,23 @@ class EnemyLibrary {
         });
 
         // 按钮事件
-        this.container.querySelector('#lib-btn-new').addEventListener('click', () => {
+        const btnNew = this.container.querySelector(`#${this.idPrefix}-btn-new`);
+        if(btnNew) btnNew.addEventListener('click', () => {
             if (this.onRequestNew) this.onRequestNew();
         });
 
-        this.container.querySelector('#lib-btn-export').addEventListener('click', () => {
+        const btnExport = this.container.querySelector(`#${this.idPrefix}-btn-export`);
+        if(btnExport) btnExport.addEventListener('click', () => {
             this.exportData();
         });
 
-        this.container.querySelector('#lib-btn-export-current').addEventListener('click', () => {
+        const btnExportCurrent = this.container.querySelector(`#${this.idPrefix}-btn-export-current`);
+        if(btnExportCurrent) btnExportCurrent.addEventListener('click', () => {
             this.exportFilteredData();
         });
 
-        this.container.querySelector('#lib-file-import').addEventListener('change', (e) => {
+        const fileImport = this.container.querySelector(`#${this.idPrefix}-file-import`);
+        if(fileImport) fileImport.addEventListener('change', (e) => {
             if (e.target.files.length > 0) {
                 this.importData(e.target.files[0]);
                 e.target.value = ''; // 重置以便再次选择
@@ -396,7 +428,7 @@ class EnemyLibrary {
     // 更新筛选下拉框 (来源、位阶、种类)
     updateSourceFilterOptions() {
         // 1. 更新来源
-        const sourceSelect = this.container.querySelector('#lib-filter-source');
+        const sourceSelect = this.container.querySelector(`#${this.idPrefix}-filter-source`);
         if (sourceSelect) {
             const filtered = this.getEnemiesFilteredBy('source');
             const sources = new Set();
@@ -417,11 +449,11 @@ class EnemyLibrary {
             });
     
             // 刷新多选 UI
-            this.refreshMultiSelectUI('lib-filter-source', 'source', '来源');
+            this.refreshMultiSelectUI(`${this.idPrefix}-filter-source`, 'source', '来源');
         }
 
         // 2. 更新位阶
-        const tierSelect = this.container.querySelector('#lib-filter-tier');
+        const tierSelect = this.container.querySelector(`#${this.idPrefix}-filter-tier`);
         if (tierSelect) {
             const filtered = this.getEnemiesFilteredBy('tier');
             const tiers = new Set();
@@ -443,11 +475,11 @@ class EnemyLibrary {
             });
     
             // 刷新多选 UI
-            this.refreshMultiSelectUI('lib-filter-tier', 'tier', '位阶');
+            this.refreshMultiSelectUI(`${this.idPrefix}-filter-tier`, 'tier', '位阶');
         }
 
         // 3. 更新种类
-        const categorySelect = this.container.querySelector('#lib-filter-category');
+        const categorySelect = this.container.querySelector(`#${this.idPrefix}-filter-category`);
         if (categorySelect) {
             const filtered = this.getEnemiesFilteredBy('category');
             const categories = new Set();
@@ -468,7 +500,7 @@ class EnemyLibrary {
             });
     
             // 刷新多选 UI
-            this.refreshMultiSelectUI('lib-filter-category', 'category', '种类');
+            this.refreshMultiSelectUI(`${this.idPrefix}-filter-category`, 'category', '种类');
         }
     }
 
@@ -507,11 +539,13 @@ class EnemyLibrary {
     }
 
     renderList() {
-        const listContainer = this.container.querySelector('#lib-list');
-        const countLabel = this.container.querySelector('#lib-count');
+        const listContainer = this.container.querySelector(`#${this.idPrefix}-list`);
+        const countLabel = this.container.querySelector(`#${this.idPrefix}-count`);
         
+        if (!listContainer) return;
+
         listContainer.innerHTML = '';
-        countLabel.textContent = `(${this.filteredEnemies.length})`;
+        if (countLabel) countLabel.textContent = `(${this.filteredEnemies.length})`;
 
         this.filteredEnemies.forEach(enemy => {
             // 找到原始索引用于更新/删除
@@ -522,7 +556,8 @@ class EnemyLibrary {
             
             // 来源标记颜色
             const isCore = enemy['来源'] === '核心书';
-            const sourceClass = isCore ? 'source-default' : 'source-custom';
+            const isVoid = enemy['来源'] === 'VOID';
+            const sourceClass = (isCore || isVoid) ? 'source-default' : 'source-custom';
             const sourceTitle = enemy['来源'] || '自定义';
 
             // 支持拖拽
