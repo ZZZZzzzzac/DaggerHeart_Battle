@@ -24,7 +24,7 @@ function renderEnvironmentCard(envData) {
             </div>
             ${introHtml}
             ${tendencyHtml}
-            ${potentialEnemiesHtml}
+            
         </div>
     `;
 
@@ -38,6 +38,7 @@ function renderEnvironmentCard(envData) {
                 </div>
             </div>
         </div>
+        ${potentialEnemiesHtml}
     `;
 
     // 特性部分

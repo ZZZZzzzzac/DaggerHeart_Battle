@@ -116,4 +116,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (addTraitBtn) {
         addTraitBtn.click();
     }
+
+    // 初始化拖拽排序
+    if (typeof window.enableDragSort === 'function') {
+        window.enableDragSort('envTraitsContainer');
+    }
 });

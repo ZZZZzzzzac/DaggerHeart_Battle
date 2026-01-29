@@ -231,4 +231,76 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // 初始化添加一个特性框
     addTraitBtn.click();
+
+    // 初始化拖拽排序
+    if (typeof window.enableDragSort === 'function') {
+        window.enableDragSort('traitsContainer');
+    }
 });
+
+// 全局拖拽排序辅助函数
+window.enableDragSort = function(containerId) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    let draggedItem = null;
+
+    container.addEventListener('mousedown', (e) => {
+        if (e.target.classList.contains('drag-handle')) {
+            const item = e.target.closest('.trait-item');
+            if (item) item.setAttribute('draggable', 'true');
+        }
+    });
+
+    container.addEventListener('mouseup', (e) => {
+         const item = e.target.closest('.trait-item');
+         if (item) item.removeAttribute('draggable');
+    });
+    
+    // Safety for mouse leaving window/element
+    container.addEventListener('dragend', (e) => {
+         const item = e.target.closest('.trait-item');
+         if (item) {
+             item.removeAttribute('draggable');
+             item.classList.remove('dragging');
+         }
+         draggedItem = null;
+    });
+
+    container.addEventListener('dragstart', (e) => {
+        draggedItem = e.target.closest('.trait-item');
+        if (draggedItem) {
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', ''); // Required for Firefox
+            // Delay adding class so the drag image is the element itself
+            setTimeout(() => draggedItem.classList.add('dragging'), 0);
+        }
+    });
+
+    container.addEventListener('dragover', (e) => {
+        e.preventDefault(); // Allow drop
+        const afterElement = getDragAfterElement(container, e.clientY);
+        const currentItem = container.querySelector('.dragging');
+        if (currentItem) {
+            if (afterElement == null) {
+                container.appendChild(currentItem);
+            } else {
+                container.insertBefore(currentItem, afterElement);
+            }
+        }
+    });
+
+    function getDragAfterElement(container, y) {
+        const draggableElements = [...container.querySelectorAll('.trait-item:not(.dragging)')];
+    
+        return draggableElements.reduce((closest, child) => {
+            const box = child.getBoundingClientRect();
+            const offset = y - box.top - box.height / 2;
+            if (offset < 0 && offset > closest.offset) {
+                return { offset: offset, element: child };
+            } else {
+                return closest;
+            }
+        }, { offset: Number.NEGATIVE_INFINITY }).element;
+    }
+};

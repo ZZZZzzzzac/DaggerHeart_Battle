@@ -45,7 +45,8 @@ body {
 .form-group input,
 .form-group textarea {
     flex: 1;
-    padding: 10px;
+    padding: 5px;
+    margin-bottom: 10px;
     border: 1px solid #ddd;
     border-radius: 4px;
     font-size: 1rem;
@@ -108,6 +109,30 @@ body {
     border-radius: 6px;
     padding: 5px;
     margin-bottom: 5px;
+    position: relative;
+    padding-left: 30px;
+}
+
+.drag-handle {
+    position: absolute;
+    left: 5px;
+    top: 15px;
+    cursor: grab;
+    font-size: 1.2rem;
+    color: #ccc;
+    padding: 2px;
+    user-select: none;
+    line-height: 1;
+}
+
+.drag-handle:hover {
+    color: #888;
+}
+
+.trait-item.dragging {
+    opacity: 0.5;
+    background: #eef;
+    border: 1px dashed #aaa;
 }
 
 .trait-header {
