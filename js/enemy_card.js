@@ -225,6 +225,8 @@ function parseMarkdown(text) {
     html = html.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
     // *斜体*
     html = html.replace(/\*(.+?)\*/g, '<i>$1</i>');
+    // 换行
+    html = html.replace(/\n/g, '<br>');
     
     return html;
 }

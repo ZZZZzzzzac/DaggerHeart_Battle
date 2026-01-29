@@ -50,7 +50,7 @@ function renderEnvironmentCard(envData) {
             
             let questionHtml = '';
             if (trait['特性问题']) {
-                questionHtml = `<div class="trait-question" style="margin-top:4px; font-style:italic; color:#666;">${parseMarkdown(trait['特性问题'])}</div>`;
+                questionHtml = `<div class="trait-question">${parseMarkdown(trait['特性问题'])}</div>`;
             }
 
             traitCard.innerHTML = `
@@ -107,27 +107,3 @@ function renderEnvironmentCard(envData) {
 
     return card;
 }
-
-// 辅助函数 (如果 enemy_card.js 已定义，这里可以不定义，但为了安全起见检查一下)
-// 注意：在浏览器环境中，如果这些函数已存在于 window，重新定义可能会报错或覆盖。
-// 为了避免冲突，我们只定义如果不存在。
-// 但 const/function 在同一作用域下不能重复声明。
-// 由于 script 标签加载，它们在同一全局作用域。
-// 最好的办法是不重复定义，直接使用。
-// 假设 enemy_card.js 已经加载。
-
-// 如果需要独立运行，可以取消下面的注释，或者重命名函数。
-
-// function parseMarkdown(text) {
-//     if (!text) return '';
-//     let html = text.replace(/&/g, "&").replace(/</g, "<").replace(/>/g, ">").replace(/"/g, "\"").replace(/'/g, "&#039;");
-//     html = html.replace(/\*\*\*(.+?)\*\*\*/g, '<b><i>$1</i></b>');
-//     html = html.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
-//     html = html.replace(/\*(.+?)\*/g, '<i>$1</i>');
-//     return html;
-// }
-
-// function dispatchUpdate(element) {
-//     element.dispatchEvent(new CustomEvent('card-update', { bubbles: true }));
-// }
-
