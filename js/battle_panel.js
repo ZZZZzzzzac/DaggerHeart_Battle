@@ -386,7 +386,7 @@ class BattlePanel {
         if (index === -1) {
             resetEditor();
         } else {
-            fillEditor(data);
+            fillEnemyEditor(data);
         }
         this.modal.style.display = 'block';
     }
@@ -410,7 +410,7 @@ class BattlePanel {
             fillEnvironmentEditor(data);
             this.envModal.style.display = 'block';
         } else {
-            fillEditor(data);
+            fillEnemyEditor(data);
             this.modal.style.display = 'block';
         }
     }
@@ -461,7 +461,7 @@ class BattlePanel {
 }
 
 // 辅助函数
-function fillEditor(data) {
+function fillEnemyEditor(data) {
     const setValue = (id, val) => {
         const el = document.getElementById(id);
         if (el) el.value = val || '';

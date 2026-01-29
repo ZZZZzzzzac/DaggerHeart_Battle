@@ -122,22 +122,24 @@ body.env-library-open #toggle-env-library-btn {
 }
 
 #battle-toolbar {
-    min-height: 60px;
+    min-height: 40px;
     background: #fff;
     border-bottom: 1px solid #dee2e6;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 20px;
+    padding: 0px 20px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     flex-shrink: 0;
     gap: 10px;
+    flex-wrap: wrap;
 }
 
 .toolbar-group {
     display: flex;
     align-items: center;
     gap: 10px;
+    flex-wrap: wrap;
 }
 
 .point-display {
