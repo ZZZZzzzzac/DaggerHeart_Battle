@@ -195,6 +195,22 @@ class OnlineEnemyLibrary {
         }
     }
 
+    // 删除云端数据
+    async deleteFromCloud(id) {
+        if (!this.user) return false;
+        
+        const { error } = await this.client
+            .from('shared_enemies')
+            .delete()
+            .eq('id', id);
+
+        if (error) {
+            console.error('Delete failed:', error);
+            return false;
+        }
+        return true;
+    }
+
     // 上传/同步逻辑
     async syncData() {
         if (!this.user) return;

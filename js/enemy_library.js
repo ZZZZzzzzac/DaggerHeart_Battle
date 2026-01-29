@@ -109,13 +109,28 @@ class EnemyLibrary {
         this.applyFilters(); // 重新渲染
     }
 
-    deleteEnemy(index) {
-        if (confirm('确定要删除这个敌人吗？')) {
-            this.enemies.splice(index, 1);
-            this.saveData();
-            this.updateSourceFilterOptions();
-            this.applyFilters();
+    async deleteEnemy(index) {
+        const enemy = this.enemies[index];
+        if (!confirm('确定要删除这个敌人吗？')) return;
+
+        // 检查云端关联：如果是当前登录用户发布的，询问是否删除云端
+        const onlineLib = window.onlineLibrary;
+        if (onlineLib && onlineLib.user && enemy.user_id === onlineLib.user.id) {
+            if (confirm('检测到该项目是您发布的，是否将云端对应数据也删除？')) {
+                const idToDelete = enemy.db_id || enemy.id;
+                const success = await onlineLib.deleteFromCloud(idToDelete);
+                if (success) {
+                    alert('云端数据已删除');
+                } else {
+                    alert('云端删除失败，继续删除本地副本');
+                }
+            }
         }
+
+        this.enemies.splice(index, 1);
+        this.saveData();
+        this.updateSourceFilterOptions();
+        this.applyFilters();
     }
 
     // 导出数据 (全部)
