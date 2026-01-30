@@ -54,30 +54,6 @@ class EnvironmentLibrary extends EnemyLibrary {
         }
     }
     
-    // 覆盖删除方法以修改提示文字
-    async deleteEnemy(index) {
-        const item = this.enemies[index];
-        if (!confirm('确定要删除这个环境吗？')) return;
-
-        // 检查云端关联：如果是当前登录用户发布的，询问是否删除云端
-        const onlineLib = window.onlineLibrary;
-        if (onlineLib && onlineLib.user && item.user_id === onlineLib.user.id) {
-            if (confirm('检测到该项目是您发布的，是否将云端对应数据也删除？')) {
-                const idToDelete = item.db_id || item.id;
-                const success = await onlineLib.deleteFromCloud(idToDelete);
-                if (success) {
-                    alert('云端数据已删除');
-                } else {
-                    alert('云端删除失败，继续删除本地副本');
-                }
-            }
-        }
-        
-        this.enemies.splice(index, 1);
-        this.saveData();
-        this.applyFilters();
-    }
-    
     // 覆盖导出文件名
     exportData() {
         this.downloadJson(this.enemies, "environment_library_all.json");

@@ -122,14 +122,14 @@ class EnemyLibrary {
     }
 
     async deleteEnemy(index) {
-        const enemy = this.enemies[index];
-        if (!confirm('确定要删除这个敌人吗？')) return;
+        const item = this.enemies[index];
+        if (!confirm('确定要删除这个卡片吗？')) return;
 
         // 检查云端关联：如果是当前登录用户发布的，询问是否删除云端
         const onlineLib = window.onlineLibrary;
-        if (onlineLib && onlineLib.user && enemy.user_id === onlineLib.user.id) {
+        if (onlineLib && onlineLib.user && item.user_id === onlineLib.user.id) {
             if (confirm('检测到该项目是您发布的，是否将云端对应数据也删除？')) {
-                const idToDelete = enemy.db_id || enemy.id;
+                const idToDelete = item.db_id || item.id;
                 const success = await onlineLib.deleteFromCloud(idToDelete);
                 if (success) {
                     alert('云端数据已删除');

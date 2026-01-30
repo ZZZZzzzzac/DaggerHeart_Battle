@@ -257,7 +257,7 @@ class OnlineEnemyLibrary {
 
         // 2. Prepare Payload
         const payload = allItems.map(e => {
-            let targetId = e.db_id || e.id;
+            let targetId = e.id;
             
             if (!targetId) {
                 // 如果没有 ID，生成一个。注意：这会修改本地对象
@@ -284,8 +284,6 @@ class OnlineEnemyLibrary {
             alert('上传失败: ' + error.message);
         } else {
             alert(`成功上传 ${data.length} 条数据！`);
-            // 重新拉取以更新本地的 db_id
-            this.fetchFromCloud(true);
         }
     }
 

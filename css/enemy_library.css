@@ -213,7 +213,7 @@
 .sort-controls {
     display: flex;
     justify-content: flex-end;
-    padding: 5px 15px 0;
+    padding: 5px 0px 0;
     font-size: 0.8rem;
     color: #6c757d;
 }

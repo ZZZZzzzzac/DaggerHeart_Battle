@@ -164,12 +164,21 @@ class BattlePanel {
             this.enemyForm.addEventListener('submit', (e) => {
                 e.preventDefault();
                 if (typeof window.collectEnemyEditorData !== 'function') return;
-
-                const newData = window.collectEnemyEditorData();
-
+    
+                let newData = window.collectEnemyEditorData();
+    
                 if (this.editContext === 'library') {
+                    // 读取原数据并合并
+                    if (this.editIndex >= 0 && this.library.enemies[this.editIndex]) {
+                        newData = { ...this.library.enemies[this.editIndex], ...newData };
+                    }
                     this.library.saveEnemy(newData, this.editIndex);
                 } else if (this.editContext === 'battle') {
+                    // 读取原数据并合并
+                    const instance = this.enemies.find(item => item.id === this.editId);
+                    if (instance) {
+                        newData = { ...instance.data, ...newData };
+                    }
                     this.updateEnemyInBattle(this.editId, newData);
                 }
                 this.modal.style.display = 'none';
@@ -198,12 +207,21 @@ class BattlePanel {
             this.envForm.addEventListener('submit', (e) => {
                 e.preventDefault();
                 if (typeof window.collectEnvironmentEditorData !== 'function') return;
-
-                const newData = window.collectEnvironmentEditorData();
-
+    
+                let newData = window.collectEnvironmentEditorData();
+    
                 if (this.editContext === 'envLibrary') {
+                    // 读取原数据并合并
+                    if (this.editIndex >= 0 && this.envLibrary.enemies[this.editIndex]) {
+                        newData = { ...this.envLibrary.enemies[this.editIndex], ...newData };
+                    }
                     this.envLibrary.saveEnemy(newData, this.editIndex);
                 } else if (this.editContext === 'battle') {
+                    // 读取原数据并合并
+                    const instance = this.enemies.find(item => item.id === this.editId);
+                    if (instance) {
+                        newData = { ...instance.data, ...newData };
+                    }
                     this.updateEnemyInBattle(this.editId, newData);
                 }
                 this.envModal.style.display = 'none';
