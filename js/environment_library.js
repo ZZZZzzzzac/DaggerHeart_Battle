@@ -10,7 +10,7 @@ class EnvironmentLibrary extends EnemyLibrary {
             idPrefix: 'env-lib',
             storageKey: 'trpg_environment_library',
             supportedType: '环境',
-            defaultSources: []
+            defaultSources: ['核心书']
         });
         
         super(containerId, envOptions);
