@@ -54,9 +54,46 @@ class EnvironmentLibrary extends EnemyLibrary {
         }
     }
     
-    // 覆盖导出文件名
+    // 覆盖导出文件名 (TXT)
     exportData() {
-        this.downloadJson(this.enemies, "environment_library_all.json");
+        const content = this.filteredEnemies.map(e => this.formatItemText(e)).join('\n');
+        this.downloadTxtContent(content, "environment_library_export.txt");
+    }
+
+    // 格式化文本 (环境)
+    formatItemText(item) {
+        const name = item['名称']||'未命名';
+        const eng = item['原文']||'';
+        const tier = item['位阶']||'-';
+        const type = item['种类']||'-';
+        const intro = item['简介']||'';
+        const tend = item['趋向']||'无';
+        const dc = item['难度']||'无';
+        const enemy = item['潜在敌人']||'无';
+
+        let traitsStr = '';
+        if (item['特性'] && Array.isArray(item['特性']) && item['特性'].length > 0) {
+            const traitList = item['特性'].map(t => {
+                const tName = t['名称'] || '未命名';
+                const tType = t['类型'] || '-';
+                const tDesc = t['特性描述'] || '';
+                const tQuest = t['特性问题']||'';
+                return `${tName} ${tType}： ${tDesc}\n${tQuest}`;
+            }).join('\n\n');
+            traitsStr = `${traitList}\n`;
+        }
+
+        return `
+${name} ${eng}
+位阶${tier} ${type}
+${intro}
+趋向：${tend}
+难度：${dc}
+潜在敌人：${enemy}
+
+特性
+${traitsStr}
+`;
     }
 
     // 覆盖导出文件名

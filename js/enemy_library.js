@@ -144,14 +144,80 @@ class EnemyLibrary {
         this.applyFilters();
     }
 
-    // 导出数据 (全部)
+    // 导出数据 (全部) -> 改为导出当前筛选结果为TXT
     exportData() {
-        this.downloadJson(this.enemies, "enemy_library_all.json");
+        const content = this.filteredEnemies.map(e => this.formatItemText(e)).join('\n');
+        this.downloadTxtContent(content, "enemy_library_export.txt");
     }
 
     // 导出数据 (当前筛选)
     exportFilteredData() {
         this.downloadJson(this.filteredEnemies, "enemy_library_filtered.json");
+    }
+
+    // 格式化文本 (默认: 敌人)
+    formatItemText(item) {
+        const name = item['名称']||'未命名';
+        const eng = item['原文']||'';
+        const tier = item['位阶']||'-';
+        const type = item['种类']||'-';
+        const intro = item['简介']||'';
+        const tactics = item['动机与战术']||'无';
+        
+        const dc = item['难度']||'无';
+        const hp = item['生命点']||'无';
+        const stress = item['压力点']||'无';
+        
+        const maj = item['重度伤害阈值']||'-';
+        const sev = item['严重伤害阈值']||'-';
+ 
+        
+        const hit = item['攻击命中']||'无';
+        const wea = item['攻击武器']||'';
+        const range = item['攻击范围']||'-';
+        const dmg = item['攻击伤害']||'-';
+        const wtype = item['攻击属性']||'-';
+        
+        const exp = item['经历']||'无';
+
+        let traitsStr = '';
+        if (item['特性'] && Array.isArray(item['特性']) && item['特性'].length > 0) {
+            const traitList = item['特性'].map(t => {
+                const tName = t['名称'] || '未命名';
+                const tOrig = t['原名'] || '';
+                const tType = t['类型'] || '-';
+                const tDesc = t['特性描述'] || '';
+                return `${tName} ${tOrig} ${tType}： ${tDesc}`;
+            }).join('\n\n');
+            traitsStr = `${traitList}\n`;
+        }
+
+        return `
+${name} ${eng}
+位阶${tier} ${type}
+${intro}
+动机与战术：${tactics}
+难度：${dc}
+生命点：${hp} | 压力点：${stress} | 阈值：${maj}/${sev}
+攻击：${hit} | ${wea} ${range} | ${dmg} ${wtype}
+经历：${exp}
+
+特性
+${traitsStr}
+`;
+    }
+
+    // 辅助下载 (Content)
+    downloadTxtContent(content, filename) {
+        const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const downloadAnchorNode = document.createElement('a');
+        downloadAnchorNode.setAttribute("href", url);
+        downloadAnchorNode.setAttribute("download", filename);
+        document.body.appendChild(downloadAnchorNode);
+        downloadAnchorNode.click();
+        downloadAnchorNode.remove();
+        URL.revokeObjectURL(url);
     }
 
     // 辅助下载
