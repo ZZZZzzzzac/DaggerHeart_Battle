@@ -218,6 +218,33 @@ function parseMarkdown(text) {
                    .replace(/"/g, "\"")
                    .replace(/'/g, "&#039;");
 
+    // 1.5 资源短语标准化
+    const resourcePattern = /\*{0,2}\s*(恢复|回复|标记|清除|移除|获得|花费|消耗)\s*(\d{1,2}d\d{1,2}|\d{1,2}|[一二三四五六])\s*(?:点|个)?\s*((?:生命|希望|压力|恐惧|绝望|恩宠|专注)(?:点)?|护甲(?:槽)?)\s*\*{0,2}/g;
+    html = html.replace(resourcePattern, function(match, action, amount_str, resource_core) {
+        // 标准化动词
+        if (action === "回复") action = "恢复";
+        else if (action === "移除") action = "清除";
+        else if (action === "消耗") action = "花费";
+
+        if (resource_core === "绝望") resource_core = "恐惧";
+
+        // 标准化数字
+        const num_map = {'一': '1', '二': '2', '三': '3', '四': '4', '五': '5', '六': '6'};
+        const amount = num_map[amount_str] || amount_str;
+
+        // 构建资源文本和后缀
+        let resource_full = resource_core;
+        if (resource_core.includes("护甲")) {
+            if (!resource_core.endsWith("槽")) {
+                resource_full += "槽";
+            }
+        } else if (!resource_core.endsWith("点")) {
+             resource_full += "点";
+        }
+        
+        return `**${action} ${amount} ${resource_full}**`;
+    });
+
     // 2. Markdown 替换
     // ***粗斜体***
     html = html.replace(/\*\*\*(.+?)\*\*\*/g, '<b><i>$1</i></b>');
