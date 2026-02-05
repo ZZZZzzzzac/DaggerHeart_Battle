@@ -158,7 +158,6 @@ body.env-library-open #toggle-env-library-btn {
     display: flex;
     flex-wrap: wrap;
     align-content: flex-start;
-    gap: 20px;
     background-color: #e9ecef;
     position: relative;
     transition: background-color 0.2s;
@@ -183,9 +182,8 @@ body.env-library-open #toggle-env-library-btn {
 /* 战斗面板上的卡片容器 */
 .battle-card-wrapper {
     position: relative;
-    width: 280px; 
     transition: transform 0.2s;
-    padding-right:10px;
+    padding:5px;
 }
 
 .battle-card-wrapper:hover {
@@ -196,7 +194,7 @@ body.env-library-open #toggle-env-library-btn {
 .card-close-btn {
     position: absolute;
     top: -8px;
-    right: -8px;
+    right: 0px;
     width: 24px;
     height: 24px;
     background: #ff6b6b;

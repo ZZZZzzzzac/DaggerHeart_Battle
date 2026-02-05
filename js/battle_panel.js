@@ -11,6 +11,7 @@ class BattlePanel {
         // DOM Elements
         this.battleArea = document.getElementById('battle-area');
         this.pcCountInput = document.getElementById('pc-count');
+        this.cardWidthInput = document.getElementById('card-width-input');
         this.budgetDisplay = document.getElementById('battle-budget');
         this.currentPointsDisplay = document.getElementById('current-points');
         this.emptyTip = document.querySelector('.empty-tip');
@@ -87,6 +88,16 @@ class BattlePanel {
             this.updatePoints();
             this.saveState();
         });
+
+        // 卡片宽度变化
+        if (this.cardWidthInput) {
+            this.cardWidthInput.addEventListener('change', (e) => {
+                let width = parseInt(e.target.value) || 280;
+                this.cardWidth = width;
+                document.documentElement.style.setProperty('--card-width', width + 'px');
+                this.saveState();
+            });
+        }
 
         // 拖放事件
         this.battleArea.addEventListener('dragover', (e) => {
@@ -256,17 +267,28 @@ class BattlePanel {
                 this.enemies = state.enemies || [];
                 this.pcCount = state.pcCount || 4;
                 this.pcCountInput.value = this.pcCount;
+                
+                this.cardWidth = state.cardWidth || 280;
+                if (this.cardWidthInput) {
+                    this.cardWidthInput.value = this.cardWidth;
+                }
+                document.documentElement.style.setProperty('--card-width', this.cardWidth + 'px');
+
             } catch (e) {
                 console.error('Failed to load battle state', e);
                 this.enemies = [];
             }
+        } else {
+            // Default
+            this.cardWidth = 280;
         }
     }
 
     saveState() {
         const state = {
             enemies: this.enemies,
-            pcCount: this.pcCount
+            pcCount: this.pcCount,
+            cardWidth: this.cardWidth
         };
         localStorage.setItem(this.storageKey, JSON.stringify(state));
         this.updatePoints();
