@@ -184,6 +184,22 @@ body.env-library-open #toggle-env-library-btn {
     position: relative;
     transition: transform 0.2s;
     padding:5px;
+    cursor: grab;
+}
+
+.battle-card-wrapper.dragging {
+    opacity: 0.4;
+    cursor: grabbing;
+}
+
+.battle-card-wrapper.drag-over-card-left {
+    border-left: 3px solid #339af0;
+    margin-left: -3px; /* 抵消 border 宽度防止抖动 */
+}
+
+.battle-card-wrapper.drag-over-card-right {
+    border-right: 3px solid #339af0;
+    margin-right: -3px;
 }
 
 .battle-card-wrapper:hover {

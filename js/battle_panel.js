@@ -329,6 +329,30 @@ class BattlePanel {
         }
     }
 
+    reorderEnemies(fromId, toId, position) {
+        const fromIndex = this.enemies.findIndex(e => e.id === fromId);
+        if (fromIndex === -1) return;
+        
+        // Remove from old position
+        const [movedItem] = this.enemies.splice(fromIndex, 1);
+        
+        // Find new index (after removal, indices might shift, but we use ID so it's safe to find again)
+        let toIndex = this.enemies.findIndex(e => e.id === toId);
+        
+        if (toIndex === -1) {
+            // Should not happen, but if so, push to end
+            this.enemies.push(movedItem);
+        } else {
+            if (position === 'after') {
+                toIndex++;
+            }
+            this.enemies.splice(toIndex, 0, movedItem);
+        }
+        
+        this.render();
+        this.saveState();
+    }
+
     // --- 渲染与计算 ---
 
     render() {
@@ -341,6 +365,66 @@ class BattlePanel {
         this.enemies.forEach(instance => {
             const wrapper = document.createElement('div');
             wrapper.className = 'battle-card-wrapper';
+            wrapper.setAttribute('draggable', 'true');
+            
+            // 拖拽事件
+            wrapper.addEventListener('dragstart', (e) => {
+                this.draggingId = instance.id;
+                wrapper.classList.add('dragging');
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/plain', instance.id);
+                e.dataTransfer.setData('type', 'sort');
+            });
+
+            wrapper.addEventListener('dragend', () => {
+                this.draggingId = null;
+                wrapper.classList.remove('dragging');
+                // 清理所有样式
+                document.querySelectorAll('.battle-card-wrapper').forEach(el => {
+                    el.classList.remove('drag-over-card-left', 'drag-over-card-right');
+                });
+            });
+
+            wrapper.addEventListener('dragover', (e) => {
+                // 仅处理内部排序
+                if (!this.draggingId) return;
+
+                e.preventDefault(); // 允许 drop
+                e.stopPropagation(); // 阻止冒泡到 battleArea
+
+                if (this.draggingId === instance.id) return;
+
+                const rect = wrapper.getBoundingClientRect();
+                const midX = rect.left + rect.width / 2;
+
+                wrapper.classList.remove('drag-over-card-left', 'drag-over-card-right');
+
+                if (e.clientX < midX) {
+                    wrapper.classList.add('drag-over-card-left');
+                } else {
+                    wrapper.classList.add('drag-over-card-right');
+                }
+            });
+
+            wrapper.addEventListener('dragleave', () => {
+                wrapper.classList.remove('drag-over-card-left', 'drag-over-card-right');
+            });
+
+            wrapper.addEventListener('drop', (e) => {
+                // 如果是排序操作
+                const type = e.dataTransfer.getData('type');
+                if (type === 'sort' && this.draggingId) {
+                    e.preventDefault();
+                    e.stopPropagation(); // 阻止冒泡到 battleArea
+                    
+                    const rect = wrapper.getBoundingClientRect();
+                    const midX = rect.left + rect.width / 2;
+                    const position = e.clientX < midX ? 'before' : 'after';
+                    
+                    this.reorderEnemies(this.draggingId, instance.id, position);
+                }
+                // 如果不是排序操作（例如从库里拖进来的），让它冒泡到 battleArea 处理
+            });
             
             // 渲染卡片
             let card;
